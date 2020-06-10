@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Dynafresh</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<script>
+	var timeoutPeriod = 1000;
+	var imageURI = 'plot.png';
+	var x=0, y=0;
+	var img = new Image();
+	img.onload = function() {
+			var canvas = document.getElementById("canvas");
+			var context = canvas.getContext("2d");
+			canvas.width = img.width
+			canvas.height = img.height
+
+
+			context.drawImage(img, x, y);
+			setTimeout(timedRefresh,timeoutPeriod);
+	};
+
+	function timedRefresh() {
+			// just change src attribute, will always trigger the onload callback
+			img.src = imageURI + '?d=' + Date.now();
+	}
+
+	img.src=imageURI;
+
+</script>
+
+</head>
+
+
+<canvas id="canvas"> </canvas>
+
+</html>
