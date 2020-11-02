@@ -10,6 +10,6 @@ while True:
     xs = np.random.normal(size=100)
     ys = np.random.normal(size=100)
     plt.plot(xs,ys,color='C1')
-    plt.savefig('plot2.png',bbox_inches='tight')
+    plt.savefig('plot.png',bbox_inches='tight')
     plt.close()
     time.sleep(4)
