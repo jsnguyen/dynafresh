@@ -1,6 +1,7 @@
 var fs = require('fs')
 var path = require('path')
 var express = require('express')
+var chokidar = require('chokidar');
 
 var app = express()
 app.use(express.static(__dirname + '/public'))
@@ -30,7 +31,8 @@ function getImageArray(){
   return imageFiles
 }
 
-files = getImageArray()
+var watcher = chokidar.watch('public/images', {ignored: /^\./, persistent: true});
+watcher.on('add', () => files=getImageArray())
 
 app.get('/response.json', bodyParser.json(), function (req, res) {
   res.contentType('application/json')
