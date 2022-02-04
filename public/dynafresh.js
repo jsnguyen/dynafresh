@@ -4,65 +4,88 @@ function timedRefresh(img) {
 }
 
 function addFilename(arr) {
-  var fs = document.getElementById('fileSelect')
-  arr.forEach( element => {
-    var option = document.createElement('option')
-    option.text = element 
-    fs.add(option)
-  })
-  fs.selectedIndex = '0'
-}
+    var fs = document.getElementById('fileSelect')
 
-function getJSON(img,url,updateCallback){
-  var xmlhttp = new XMLHttpRequest()
-  xmlhttp.open('GET', url , true)
-  xmlhttp.onreadystatechange = function() {
-    if (xmlhttp.readyState == 4) {
-      if(xmlhttp.status == 200) {
-        var json_obj = JSON.parse(xmlhttp.responseText)
-        console.log(json_obj)
-        updateCallback(img,json_obj)
-      }
+    if (! arr.some(el => Array.from(fs.options).includes(el)) ) {
+        removeOptions(fs)
     }
-  }
-  xmlhttp.timeout=5000
-  xmlhttp.send(null)
+
+    arr.forEach( element => {
+        var option = document.createElement('option')
+        option.text = element 
+        fs.add(option)
+    })
+
+    }
+
+function removeOptions(selectElement) {
+    var i, L = selectElement.options.length - 1;
+    for(i = L; i >= 0; i--) {
+        selectElement.remove(i);
+    }
 }
 
-function setOnChange(img) {
-  var fs = document.getElementById('fileSelect')
-  fs.onchange = () => {
-    img.src = 'images/'+fs.options[fs.selectedIndex].text
-  }
-}
-
-function setDefaultPlot(img){
-  var fs = document.getElementById('fileSelect')
-  img.src = 'images/'+fs.options[0].text
-}
-
-function loadAll(img,json_obj){
-  addFilename(json_obj)
-  setDefaultPlot(img)
-}
+// parameters
+const port = 12301
 
 function main(){
 
-  var timeoutPeriod = 500
-  var x=0, y=0
-  var img = new Image()
+    window.onload = () => {
 
-  img.onload = function() {
-      var canvas = document.getElementById('canvas')
-      var context = canvas.getContext('2d')
-      canvas.width = window.innerWidth
-      canvas.height = window.innerHeight
-      context.drawImage(img, (canvas.width-img.width)/2, (canvas.height-img.height)/2)
-      setTimeout(() => timedRefresh(img),timeoutPeriod)
-  }
+        var img = new Image()
 
-  setOnChange(img)
-  getJSON(img,'response.json', loadAll)
+        img.onload = function() {
+            var canvas = document.getElementById('canvas')
+            var context = canvas.getContext('2d')
+            canvas.width = window.innerWidth
+            canvas.height = window.innerHeight
+            context.drawImage(img, (canvas.width-img.width)/2, (canvas.height-img.height)/2)
+        }
+
+        var fs = document.getElementById('fileSelect')
+        fs.onchange = () => {
+            img.src = 'images/'+fs.options[fs.selectedIndex].text
+        }
+
+        var leftArrow = document.getElementById('leftArrow')
+        leftArrow.onclick = () => {
+            if (fs.selectedIndex == 0) {
+                var new_index = fs.options.length-1
+            } else {
+                var new_index = fs.selectedIndex-1
+            }
+            img.src = 'images/'+fs.options[new_index].text
+            fs.selectedIndex = new_index
+        }
+
+        var rightArrow = document.getElementById('rightArrow')
+        rightArrow.onclick = () => {
+            if (fs.selectedIndex == fs.options.length-1) {
+                var new_index = 0
+            } else {
+                var new_index = fs.selectedIndex+1
+            }
+            img.src = 'images/'+fs.options[new_index].text
+            fs.selectedIndex = new_index
+        }
+
+        const socket = new WebSocket('ws://localhost:'+String(port+1))
+
+        socket.addEventListener('message', function (event) {
+            console.log('Message from server ', event.data);
+            var json_obj = JSON.parse(event.data)
+            addFilename(json_obj)
+
+            if (img.src === '') {
+                img.src = 'images/'+fs.options[0].text
+            } else {
+                img.src = img.src.split('?')[0] + '?d=' + Date.now()
+            }
+
+        });
+
+
+    }
 
 }
 

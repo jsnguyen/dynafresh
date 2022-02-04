@@ -3,17 +3,21 @@
 <meta content="utf-8" http-equiv="encoding">
 <html>
 
-  <head>
-    <title>Dynafresh</title>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <link rel="stylesheet" type="text/css" href="styles.css" media="screen" />
-  </head>
+    <head>
+        <title>Dynafresh</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <link rel="stylesheet" type="text/css" href="styles.css" media="screen" />
+        <script src="dynafresh.js"></script>
+    </head>
 
-  <div class="centering">
-    <select name="fileSelect" id="fileSelect"></select>
-  </div>
+    <body>
+        <div class="centering">
+            <div class="leftArrow" id="leftArrow"> </div>
+            <select class="fileSelect" id="fileSelect"></select>
+            <div class="rightArrow" id="rightArrow"> </div>
+        </div>
 
-  <canvas id="canvas"> </canvas>
-  <script src="dynafresh.js"></script>
+        <canvas id="canvas"> </canvas>
+    </body>
 
 </html>
