@@ -6,7 +6,8 @@ function timedRefresh(img) {
 function addFilename(arr) {
     var fs = document.getElementById('fileSelect')
 
-    if (! arr.some(el => Array.from(fs.options).includes(el)) ) {
+    if (arr.some(el => Array.from(fs.options).includes(el)) ) {
+        console.log('removing')
         removeOptions(fs)
     }
 

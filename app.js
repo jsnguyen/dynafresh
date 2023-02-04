@@ -7,7 +7,7 @@ var WebSocket = require('ws')
 function getImageFiles(){
   var files = fs.readdirSync('public/images')
 
-  var allowedExt = ['.jpg','.png','.pdf']
+  var allowedExt = ['.jpg','.png','.pdf', '.gif']
 
   var imageFiles=[]
   files.forEach(file => { 
