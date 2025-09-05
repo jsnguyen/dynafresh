@@ -1,23 +1,37 @@
-<!DOCTYPE html>
-<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-<meta content="utf-8" http-equiv="encoding">
-<html>
 
+<!DOCTYPE html>
+<html lang="en">
     <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dynafresh</title>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <link rel="stylesheet" type="text/css" href="styles.css" media="screen" />
         <script src="dynafresh.js"></script>
     </head>
-
     <body>
-        <div class="centering">
-            <div class="leftArrow" id="leftArrow"> </div>
-            <select class="fileSelect" id="fileSelect"></select>
-            <div class="rightArrow" id="rightArrow"> </div>
+        <div class="container" id="plotContainer">
+
+            <div class="filepath-input-container">
+                <input type="text" id="filepathInput" placeholder="Enter server filepath..." />
+                <button id="filepathBtn">Load</button>
+            </div>
+
+            <div class="metadata-container row-container">
+                <div class="filepath-display-container">
+                    <div id="filePathDisplay">
+                        Watching:
+                    </div>
+                    <div> </div>
+                </div>
+
+                <div class="update-container">
+                    <div id="updateTime"></div>
+                    <div id="updateTimeAgo"></div>
+                </div>
+            </div>
+
+            <canvas id="canvas"></canvas>
+
         </div>
-
-        <canvas id="canvas"> </canvas>
     </body>
-
 </html>

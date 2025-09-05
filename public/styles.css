@@ -1,41 +1,108 @@
 html, body {
-    width:  100%;
+    width: 100%;
     height: 100%;
-    margin: 0px;
-    border: 0;
-    overflow: hidden; /*  Disable scrollbars */
-    display: block;  /* No floating content on sides */
+    background: #f7f9fb;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    min-height: 100vh;
 }
 
-.centering {
-    margin: 2em;
-    display: flex;
-    justify-content: center;
+h1 {
+    text-align: center;
+    font-size: 2.2rem;
+    color: #2a3a4d;
+    margin-bottom: 24px;
+    letter-spacing: 1px;
+}
+
+canvas {
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    background: transparent;
+}
+
+.container {
+    max-width: 600px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 8px;
+    border: 2px solid white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    padding: 20px;
 }
 
 .fileSelect {
-    width: 100px;
-    height: 20px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    background: #f3f4f6;
+    color: #2a3a4d;
+    outline: none;
+    transition: border 0.2s;
+}
+.fileSelect:focus {
+    border: 1.5px solid #3b82f6;
 }
 
-.leftArrow {
-    content: " ";
-    border-left: 4px solid black;
-    border-bottom: 4px solid black;
-    width: 20px;
-    height: 20px;
-    transform: rotate(45deg);
-    cursor: pointer;
-    display: block;
+.filepath-input-container {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+    margin: 8px;
 }
 
-.rightArrow {
-    content: " ";
-    border-right: 4px solid black;
-    border-top: 4px solid black;
-    width: 20px;
-    height: 20px;
-    transform: rotate(45deg);
+.update-container {
+    width: 35%;
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+    color: #64748b;
+    font-size: 1rem;
+}
+
+.metadata-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin: 8px;
+}
+
+#filepathInput {
+    width: 85%;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+    margin: 0 8px 0 0;
+}
+
+#filepathInput:focus {
+    border-color: #3b82f6;
+}
+
+#filepathBtn {
+    width: 15%;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: none;
+    background: #3b82f6;
+    color: #fff;
+    font-size: 1rem;
     cursor: pointer;
-    display: block;
+    transition: background 0.2s;
+}
+
+#filepathBtn:hover {
+    background: #2563eb;
+}
+
+#filePathDisplay {
+    font-size: 1rem;
+    color: #4b5563;
+    text-align: left;
+    word-break: break-all;
 }
