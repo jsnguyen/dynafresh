@@ -2,15 +2,59 @@ function timeAgo(date) {
   const now = new Date();
   const diffMs = now - date;
   const diffSec = Math.round(diffMs / 1000);
+
+  if (diffSec <= 1) {
+    return `(${diffSec} sec ago)`;
+  }
   if (diffSec < 60) {
     return `(${diffSec} secs ago)`;
   }
+
   const diffMin = Math.round(diffSec / 60);
+
+  if (diffMin <= 1) {
+    return `(${diffMin} min ago)`;
+  }
+
   if (diffMin < 60) {
     return `(${diffMin} mins ago)`;
   }
+
   const diffHr = Math.round(diffMin / 60);
-  return `(${diffHr} hrs ago)`;
+
+  if (diffHr <= 1) {
+    return `(${diffHr} hr ago)`;
+  }
+
+  if (diffHr < 24) {
+    return `(${diffHr} hrs ago)`;
+  }
+
+}
+
+function getRecentPaths() {
+    const stored = localStorage.getItem('recentPaths');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function addRecentPath(filepath, maxpaths=10) {
+    let recent = getRecentPaths();
+    // Remove if already exists
+    recent = recent.filter(p => p !== filepath);
+    // Add to front
+    recent.unshift(filepath);
+    // Keep only last 10
+    recent = recent.slice(0, maxpaths);
+    localStorage.setItem('recentPaths', JSON.stringify(recent));
+    updateRecentPathsDropdown();
+}
+
+function updateRecentPathsDropdown() {
+    const datalist = document.getElementById('recentPaths');
+    const recent = getRecentPaths();
+    datalist.innerHTML = recent.map(path => 
+        `<option value="${path}">${path}</option>`
+    ).join('');
 }
 
 function timedRefresh(img) {
@@ -36,13 +80,22 @@ function setCanvasSize() {
 }
 
 
-function drawImageActualSize(img) {
+function drawImage(img, fade=false) {
   var canvas = document.getElementById("canvas");
   var context = canvas.getContext("2d");
-  canvas.width = img.width;
-  canvas.height = img.height;
-  context.clearRect(0, 0, img.width, img.height);
-  context.drawImage(img, 0, 0);
+
+  if (fade) canvas.parentElement.classList.add('fade-out');
+  
+  setTimeout(() => {
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.drawImage(img, 0, 0);
+    
+    if (fade) canvas.parentElement.classList.remove('fade-out');
+  }, 150);
+
 }
 
 let lastUpdateTime = null;
@@ -64,17 +117,73 @@ function updateTimeDisplay() {
 
 setInterval(updateTimeAgoDisplay, 1000); // update every second
 
+function showRecentPathsModal() {
+  const recent = getRecentPaths();
+  if (recent.length === 0) {
+    alert("No recent paths");
+    return;
+  }
+
+  const overlay = document.getElementById('recent-paths-modal-overlay');
+  const list = document.getElementById('recentPathsList');
+  
+  // Clear and populate the list
+  list.innerHTML = '';
+  
+  recent.forEach(path => {
+    const item = document.createElement('div');
+    item.className = 'recent-path-item';
+    item.textContent = path;
+    
+    item.onclick = () => {
+      const filepathInput = document.getElementById("filepathInput");
+      filepathInput.value = path;
+      filepathButton.click();
+      hideRecentPathsModal();
+    };
+    
+    list.appendChild(item);
+  });
+  
+  // Show the modal with fade-in animation
+  overlay.classList.remove('hidden');
+}
+
+function hideRecentPathsModal() {
+  const overlay = document.getElementById('recent-paths-modal-overlay');
+  overlay.classList.add('hidden');
+}
+
 function main() {
   window.onload = () => {
+    const socket = new WebSocket("ws://localhost:" + String(port+1));
+
     setCanvasSize();
     window.addEventListener('resize', setCanvasSize);
 
     var img = new Image();
     img.onload = function () {
-      drawImageActualSize(img);
+      drawImage(img, fade=true);
     };
 
-    const socket = new WebSocket("ws://localhost:" + String(port+1));
+    // on resize, redraw current image
+    window.addEventListener('resize', function () {
+      drawImage(img, fade=false);
+    });
+
+    updateRecentPathsDropdown();
+
+    socket.addEventListener("open", function () {
+      const recentPaths = getRecentPaths();
+      var filepathInput = document.getElementById("filepathInput");
+      
+      if (recentPaths.length > 0) {
+        const lastPath = recentPaths[0];
+        filepathInput.value = lastPath;
+
+        filepathButton.click();
+      }
+    });
 
     socket.addEventListener("message", function (event) {
       console.log("Message from server ", event.data);
@@ -88,24 +197,35 @@ function main() {
 
       }
 
-      var plotContainer = document.getElementById("plotContainer");
-      plotContainer.style.border = "2px solid rgba(85, 183, 85, 1)";
+      var filepathInput = document.getElementById("filepathInput");
+      filepathInput.style.border = "2px solid rgba(65, 172, 65, 1)";
 
     });
 
     // Add event for filepath input
-    var filepathBtn = document.getElementById("filepathBtn");
+    var filepathButton = document.getElementById("filepathButton");
     var filepathInput = document.getElementById("filepathInput");
-    filepathBtn.onclick = function () {
+    filepathButton.onclick = function () {
       const value = filepathInput.value.trim();
       if (value) {
         // Send filepath to server via WebSocket
+        addRecentPath(value);
         socket.send(JSON.stringify({ filepath: value }));
       }
 
-      const filePathDisplayDiv = document.getElementById("filePathDisplay");
-      filePathDisplayDiv.innerHTML = `Watching: ${value}`;
+    };
 
+    var showRecentButton = document.getElementById("recentButton");
+    showRecentButton.onclick = showRecentPathsModal;
+
+    var closeRecentModal = document.getElementById("closeRecentModal");
+    closeRecentModal.onclick = hideRecentPathsModal;
+
+    var overlay = document.getElementById('recent-paths-modal-overlay');
+    overlay.onclick = (e) => {
+      if (e.target === overlay) {
+        hideRecentPathsModal();
+      }
     };
 
   }

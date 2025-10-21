@@ -9,28 +9,38 @@
         <script src="dynafresh.js"></script>
     </head>
     <body>
-        <div class="container" id="plotContainer">
+        <h1>Dynafresh</h1>
+        <div class="container">
 
             <div class="filepath-input-container">
-                <input type="text" id="filepathInput" placeholder="Enter server filepath..." />
-                <button id="filepathBtn">Load</button>
+                <input type="text" id="filepathInput" placeholder="Enter filepath..." list="recentPaths" />
+                <datalist id="recentPaths"></datalist>
+                <button id="recentButton" title="Show recent paths">↓</button>
+                <button id="filepathButton">Watch</button>
             </div>
 
-            <div class="metadata-container row-container">
-                <div class="filepath-display-container">
-                    <div id="filePathDisplay">
-                        Watching:
-                    </div>
-                    <div> </div>
-                </div>
-
+            <div class="metadata-container">
                 <div class="update-container">
                     <div id="updateTime"></div>
                     <div id="updateTimeAgo"></div>
                 </div>
             </div>
 
-            <canvas id="canvas"></canvas>
+            <div id="plotContainer">
+                <canvas id="canvas"></canvas>
+            </div>
+
+            <div id="recent-paths-modal-overlay" class="hidden">
+                <div class="recent-paths-modal">
+                    <div class="recent-paths-modal-header">
+                        <h2>Recent Paths</h2>
+                        <button class="recent-paths-modal-close" id="closeRecentModal"></button>
+                    </div>
+                    <div class="recent-paths-list" id="recentPathsList">
+                        <!-- Items will be populated by JS -->
+                    </div>
+                </div>
+            </div>
 
         </div>
     </body>

@@ -1,13 +1,13 @@
 # Dynafresh
 
-# Install
+## Install
 
-```
+``` sh
 npm install
 ```
 
-# Run
+## Run
 
-```
+``` sh
 node app.js
 ```
