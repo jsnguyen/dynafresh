@@ -66,7 +66,7 @@ class Plot {
     const plotHTML = `
       <div class="container" id="plot-${this.plotId}">
         <div class="plot-header">
-          <input type="text" class="plot-filepath-input" placeholder="Enter filepath..." list="recentPaths" />
+          <input type="text" class="plot-filepath-input" placeholder="Enter filepath..." list="recent-paths" />
           <button class="recent-button" title="Show recent paths">↓</button>
           <button class="close-button"></button>
         </div>
@@ -113,7 +113,7 @@ class Plot {
   showRecentPathsModal() {
     const recent = getRecentPaths();
     const overlay = document.getElementById('recent-paths-modal-overlay');
-    const list = document.getElementById('recentPathsList');
+    const list = document.getElementById('recent-paths-list');
     
     // Clear and populate the list
     list.innerHTML = '';
@@ -164,6 +164,16 @@ class Plot {
       context.drawImage(this.img, 0, 0);
       
       if (fade) this.canvas.parentElement.classList.remove('fade-out');
+      
+      // Check if image is tall (aspect ratio)
+      const aspectRatio = this.img.naturalWidth / this.img.naturalHeight;
+      console.log(`Plot ${this.plotId} - Image aspect ratio: ${aspectRatio}`);
+      if (aspectRatio > 2.5) {
+        // Image is tall or square, give it full width
+        this.container.classList.add('full-width');
+      } else {
+        this.container.classList.remove('full-width');
+      }
     }, 150);
   }
 
@@ -423,7 +433,7 @@ function addRecentPath(filepath, maxpaths=10) {
 }
 
 function updateRecentPathsDropdown() {
-    const datalist = document.getElementById('recentPaths');
+    const datalist = document.getElementById('recent-paths');
     const recent = getRecentPaths();
     datalist.innerHTML = recent.map(path => 
         `<option value="${path}">${path}</option>`
@@ -464,7 +474,7 @@ function hideRecentPathsModal() {
 function showMainRecentPathsModal() {
   const recent = getRecentPaths();
   const overlay = document.getElementById('recent-paths-modal-overlay');
-  const list = document.getElementById('recentPathsList');
+  const list = document.getElementById('recent-paths-list');
   
   // Clear and populate the list
   list.innerHTML = '';
@@ -475,7 +485,7 @@ function showMainRecentPathsModal() {
     item.textContent = path;
     
     item.onclick = () => {
-      const mainInput = document.getElementById('mainFilepathInput');
+      const mainInput = document.getElementById('main-filepath-input');
       mainInput.value = path;
       plotManager.watchFilepath(path);
       addRecentPath(path);
@@ -503,9 +513,9 @@ function main() {
     const recentPaths = getRecentPaths();
 
     // Main filepath input handlers
-    const mainFilepathInput = document.getElementById('mainFilepathInput');
-    const mainWatchButton = document.getElementById('mainWatchButton');
-    const mainRecentButton = document.getElementById('mainRecentButton');
+    const mainFilepathInput = document.getElementById('main-filepath-input');
+    const mainWatchButton = document.getElementById('main-watch-button');
+    const mainRecentButton = document.getElementById('main-recent-button');
 
     mainWatchButton.onclick = () => {
       const filepath = mainFilepathInput.value.trim();
@@ -541,16 +551,16 @@ function main() {
       plotManager.handleMessage(event.data);
     });
 
-    const addPlotButton = document.getElementById("addPlotButton");
+    const addPlotButton = document.getElementById("add-plot-button");
     if (addPlotButton) {
       addPlotButton.onclick = () => plotManager.createPlot();
     }
 
     // Recent paths modal handlers
-    var closeRecentModal = document.getElementById("closeRecentModal");
+    var closeRecentModal = document.getElementById("close-recent-modal");
     closeRecentModal.onclick = hideRecentPathsModal;
     
-    var clearRecentPathsButton = document.getElementById("clearRecentPathsButton");
+    var clearRecentPathsButton = document.getElementById("clear-recent-paths-button");
     clearRecentPathsButton.onclick = clearRecentPaths;
 
     var overlay = document.getElementById('recent-paths-modal-overlay');

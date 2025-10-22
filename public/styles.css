@@ -1,17 +1,18 @@
+/* ===== BASE STYLES ===== */
 html, body {
     width: 100%;
-    background: #f7f9fb;
-    font-family: 'Segoe UI', Arial, sans-serif;
-    margin: 0;
     min-height: 100vh;
-    scroll-behavior: smooth;
+    margin: 0;
     padding-bottom: 40px;
+    background: #e8e5df;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    scroll-behavior: smooth;
 }
 
 h1 {
+    margin: 8px;
     font-size: 2.2rem;
     color: #2a3a4d;
-    margin: 8px;
 }
 
 h2 {
@@ -20,6 +21,7 @@ h2 {
     color: #2a3a4d;
 }
 
+/* ===== CANVAS ===== */
 canvas {
     display: block;
     max-width: 100%;
@@ -35,17 +37,18 @@ canvas.fade-in {
     opacity: 1;
 }
 
+/* ===== BUTTONS ===== */
 button {
     padding: 8px 16px;
+    margin: 0 2px;
     border-radius: 6px;
     border: 1px solid transparent;
     background: #3b82f6;
     color: #fff;
     font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
-    margin: 0 2px;
-    font-weight: 500;
 }
 
 button:hover {
@@ -56,114 +59,79 @@ button:active {
     transform: scale(0.98);
 }
 
-.container {
-    max-width: 800px;
-    margin: 16px auto;
-    background: #fff;
-    border-radius: 6px;
-    border: 2px solid white;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-    padding: 16px;
-    transition: box-shadow 0.3s ease-in-out;
+/* Main Watch Button */
+#main-watch-button {
+    background: #10b981;
+    min-width: 80px;
 }
 
-.container.canvas-focused {
-    box-shadow: 0 0 0 2px #3b82f6,
-                0 4px 24px rgba(0,0,0,0.2);
+#main-watch-button:hover {
+    background: #059669;
 }
 
-.container.plot-updated {
-    animation: greenGlow 1s ease-in-out;
-}
-
-@keyframes greenGlow {
-    0% {
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-    }
-    10% {
-        box-shadow: 0 0 20px 4px rgba(34, 197, 94, 0.5),
-                    0 0 12px 2px rgba(34, 197, 94, 0.3),
-                    0 4px 24px rgba(0, 0, 0, 0.2);
-    }
-    100% {
-        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
-    }
-}
-
-.filepath-input-container {
+/* Recent Button */
+.recent-button {
+    padding: 0;
+    width: 44px;
+    height: 44px;
+    border: 1px solid #3b82f6;
+    background: #ffffff;
+    color: #3b82f6;
+    font-size: 1rem;
+    font-weight: 500;
     display: flex;
-    align-items: left;
-    justify-content: left;
-    margin: 8px;
-}
-
-.filepath-display-container {
-    margin: 2px;
-    padding: 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    background: #f9fafb;
-}
-
-.update-container {
-    display: flex;
-    align-items: flex-end;
-    flex-direction: column;
-    color: #64748b;
-    font-size: 0.9rem;
-}
-
-.metadata-container {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.metadata-container > :first-child {
-    flex: 1;
+.recent-button:hover {
+    background: #3b82f6;
+    color: #ffffff;
 }
 
-.metadata-container > :nth-child(2) {
-    flex: 1;
-    margin: 0 10%;  /* Center the button */
+/* Plot Action Buttons */
+.plot-reset-button {
+    background: #6b7280;
+    position: relative;
 }
 
-.metadata-container > :last-child {
-    flex: 1;
-    text-align: right;
+.plot-reset-button:hover {
+    background: #4b5563;
 }
 
-.recent-paths-modal {
-    background-color: white;
-    border-radius: 6px;
-    padding: 20px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow: auto;
+.plot-save-button {
+    background: #8b5cf6;
+    position: relative;
 }
 
-.recent-paths-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+.plot-save-button:hover {
+    background: #7c3aed;
 }
 
+.plot-reset-button.button-pulse,
+.plot-save-button.button-pulse {
+    animation: pulseButton 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pulseButton {
+    0%, 100% {
+        box-shadow: none;
+    }
+    50% {
+        box-shadow: 
+            0 0 0 3px rgba(59, 130, 246, 0.5),
+            0 0 0 5px rgba(59, 130, 246, 0.25);
+    }
+}
+
+/* Close Button */
 .close-button {
+    position: relative;
+    padding: 8px;
     border: 1px solid #ef4444;
     background: #ffffff;
     color: #ef4444;
-    cursor: pointer;
-    padding: 8px;
-    width: 32px;
-    height: 32px;
-    position: relative;
-    border-radius: 6px;
-    transition: all 0.2s;
     flex-shrink: 0;
 }
 
@@ -191,46 +159,152 @@ button:active {
     transform: translate(-50%, -50%) rotate(-45deg);
 }
 
-.recent-paths-list {
+/* Clear Button */
+#clear-recent-paths-button {
+    padding: 8px 16px;
+    border: 1px solid #ef4444;
+    background: #ffffff;
+    color: #ef4444;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+#clear-recent-paths-button:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+/* ===== INPUTS ===== */
+#main-filepath-input {
+    flex: 1;
+    padding: 10px;
+    margin: 0 2px 0 0;
+    border-radius: 6px;
+    border: 2px solid #3b82f6;
+    background-color: #ffffff;
+    font-size: 1.05rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+#main-filepath-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.plot-filepath-input {
+    flex: 1;
+    padding: 8px;
+    margin: 0;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+    box-sizing: border-box;
+}
+
+.plot-filepath-input:focus {
+    border-color: #3b82f6;
+}
+
+/* ===== GRID LAYOUT ===== */
+#plots-container {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-auto-flow: dense;
+    gap: 16px;
+    padding: 0 16px;
+}
+
+@media (min-width: 768px) {
+    #plots-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (min-width: 1400px) {
+    #plots-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (min-width: 2000px) {
+    #plots-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+/* ===== CONTAINERS ===== */
+.container {
     display: flex;
     flex-direction: column;
-    gap: 8px;
-}
-
-.recent-path-item {
-    padding: 8px;
-    border: 1px solid #d1d5db;
+    max-width: none;
+    margin: 0;
+    padding: 16px;
+    background: #fff;
     border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.2s;
-    word-break: break-all;
-    background-color: white;
+    border: 1px solid #e0e0e0;
+    box-shadow: 
+        -1px -1px 0px rgba(255, 255, 255, 0.8) inset,
+        1px 1px 0px rgba(0, 0, 0, 0.1) inset,
+        4px 4px 0px rgba(0, 0, 0, 0.15);
+    position: relative;
+    transition: box-shadow 0.3s ease-in-out;
 }
 
-.recent-path-item:hover {
-    background-color: #f3f4f6;
-    border-color: #9ca3af;
+.container.main-header {
+    margin: 16px;
 }
 
-.recent-paths-modal-footer {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
+.container.full-width {
+    grid-column: 1 / -1;
 }
 
-.recent-paths-modal {
-    background-color: white;
+.container.canvas-focused {
+    box-shadow: 
+        -1px -1px 0px rgba(255, 255, 255, 0.8) inset,
+        1px 1px 0px rgba(0, 0, 0, 0.1) inset,
+        0 0 0 2px #3b82f6,
+        4px 4px 0px rgba(0, 0, 0, 0.15);
+}
+
+/* Glow Effect Layer */
+.container::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
     border-radius: 8px;
-    padding: 20px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transform: scale(0.9);
-    transition: transform 0.2s ease-in-out;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.container.plot-updated::after {
+    animation: glowEffect 1s ease-in-out;
+}
+
+@keyframes glowEffect {
+    0%, 100% {
+        opacity: 0;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    }
+    10% {
+        opacity: 1;
+        box-shadow: 
+            0 0 20px 4px rgba(34, 197, 94, 0.5),
+            0 0 12px 2px rgba(34, 197, 94, 0.3);
+    }
+}
+
+/* ===== CONTAINER SECTIONS ===== */
+.filepath-input-container {
+    display: flex;
+    align-items: center;
+    margin: 8px;
 }
 
 .plot-header {
@@ -244,26 +318,11 @@ button:active {
 }
 
 .plot-header .plot-filepath-input {
-    flex: 1;
-    padding: 0.5rem;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background-color: #f8f8f8;
-    font-size: 1rem;
-    outline: none;
-    transition: border 0.2s;
-    margin: 0;
-    box-sizing: border-box;
     line-height: 1.5;
-}
-
-.plot-header .plot-filepath-input:focus {
-    border-color: #3b82f6;
 }
 
 .plot-header .recent-button,
 .plot-header .close-button {
-    flex-shrink: 0;
     padding: 0.5rem;
     min-width: calc(1.5em + 1rem + 2px);
     min-height: calc(1.5em + 1rem + 2px);
@@ -272,185 +331,48 @@ button:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    box-sizing: border-box;
 }
 
-#filepathInput {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background-color: #f8f8f8;
-    font-size: 1rem;
-    outline: none;
-    transition: border 0.2s;
-    margin: 0 2px 0 0;
-}
-
-#filepathInput:focus {
-    border-color: #3b82f6;
-}
-
-#mainFilepathInput {
-    width: 100%;
-    padding: 10px;
-    border-radius: 6px;
-    border: 2px solid #3b82f6;
-    background-color: #ffffff;
-    font-size: 1.05rem;
-    outline: none;
-    transition: all 0.2s;
-    margin: 0 2px 0 0;
-}
-
-#mainFilepathInput:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-#mainWatchButton {
-    background: #10b981;
-    border: 1px solid transparent;
-    min-width: 80px;
-}
-
-#mainWatchButton:hover {
-    background: #059669;
-}
-
-.recent-button {
-    padding: 0;
-    font-size: 1rem;
-    border: 1px solid #3b82f6;
-    border-radius: 6px;
-    background: #ffffff;
-    color: #3b82f6;
-    cursor: pointer;
-    transition: all 0.2s;
-    width: 44px;
-    height: 44px;
-    font-weight: 500;
+.plot-canvas-container {
+    flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
+    min-height: 0;
 }
 
-.recent-button:hover {
-    background: #3b82f6;
-    color: #ffffff;
-}
-
-.plot-watch-button {
-    background: #10b981;
-    border: 1px solid transparent;
-    min-width: 80px;
-}
-
-.plot-watch-button:hover {
-    background: #059669;
-}
-
-.plot-reset-button {
-    background: #6b7280;
-    border: 1px solid transparent;
-    position: relative;
-}
-
-.plot-reset-button:hover {
-    background: #4b5563;
-}
-
-.plot-reset-button.button-pulse {
-    animation: pulseButton 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.plot-save-button {
-    background: #8b5cf6;
-    border: 1px solid transparent;
-    position: relative;
-}
-
-.plot-save-button:hover {
-    background: #7c3aed;
-}
-
-.plot-save-button.button-pulse {
-    animation: pulseButton 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-@keyframes pulseButton {
-    0% {
-        box-shadow: none;
-    }
-    50% {
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5),
-                    0 0 0 5px rgba(59, 130, 246, 0.25);
-    }
-    100% {
-        box-shadow: none;
-    }
-}
-
-.plot-filepath-input {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background-color: #f8f8f8;
-    font-size: 1rem;
-    outline: none;
-    transition: border 0.2s;
-    margin: 0 2px 0 0;
-}
-
-.plot-filepath-input:focus {
-    border-color: #3b82f6;
-}
-
-#filepathButton {
-    width: 15%;
-}
-
-#filePathDisplay {
-    font-size: 1rem;
-    color: #4b5563;
-    text-align: left;
-    word-break: break-all;
-}
-
-/* Recent Paths Modal */
-#recent-paths-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+.metadata-container {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
 }
 
-
-
-#clearRecentPathsButton {
-    padding: 8px 16px;
-    font-size: 1rem;
-    border: 1px solid #ef4444;
-    border-radius: 6px;
-    background: #ffffff;
-    color: #ef4444;
-    transition: all 0.2s;
-    font-weight: 500;
+.metadata-container > :first-child,
+.metadata-container > :nth-child(2),
+.metadata-container > :last-child {
+    flex: 1;
 }
 
-#clearRecentPathsButton:hover {
-    background: #ef4444;
-    color: #ffffff;
+.metadata-container > :nth-child(2) {
+    margin: 0 10%;
 }
 
+.metadata-container > :last-child {
+    text-align: right;
+}
+
+.update-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+/* ===== MODALS ===== */
 #recent-paths-modal-overlay {
     position: fixed;
     top: 0;
@@ -465,8 +387,8 @@ button:active {
     align-items: center;
     justify-content: center;
     opacity: 0;
-    transition: opacity 0.2s ease-in-out;
     pointer-events: none;
+    transition: opacity 0.2s ease-in-out;
 }
 
 #recent-paths-modal-overlay:not(.hidden) {
@@ -474,31 +396,55 @@ button:active {
     pointer-events: auto;
 }
 
-#recent-paths-modal-overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
-}
-
-#plotContainer {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-#plotContainer.fade-out {
-    opacity: 0;
-}
-
-
 #recent-paths-modal-overlay:not(.hidden) .recent-paths-modal {
     transform: scale(1);
 }
 
-#saveFigureButton {
-    background: #10b981;
-    border: 1px solid transparent;
+.recent-paths-modal {
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: auto;
+    transform: scale(0.9);
+    transition: transform 0.2s ease-in-out;
 }
 
-#saveFigureButton:hover {
-    background: #059669;
+.recent-paths-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.recent-paths-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.recent-path-item {
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background-color: white;
+    cursor: pointer;
+    word-break: break-all;
+    transition: all 0.2s;
+}
+
+.recent-path-item:hover {
+    background-color: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.recent-paths-modal-footer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
 }

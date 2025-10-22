@@ -10,13 +10,13 @@
     </head>
     <body>
 
-        <div class="container">
+        <div class="container main-header">
             <h1>Dynafresh</h1>
             
             <div class="filepath-input-container">
-                <input type="text" id="mainFilepathInput" placeholder="Enter filepath..." list="recentPaths" />
-                <button class="recent-button" id="mainRecentButton" title="Show recent paths">↓</button>
-                <button id="mainWatchButton">Watch</button>
+                <input type="text" id="main-filepath-input" placeholder="Enter filepath..." list="recent-paths" />
+                <button class="recent-button" id="main-recent-button" title="Show recent paths">↓</button>
+                <button id="main-watch-button">Watch</button>
             </div>
         </div>
 
@@ -27,17 +27,17 @@
             <div class="recent-paths-modal">
                 <div class="recent-paths-modal-header">
                     <h2>Recent Paths</h2>
-                    <button class="close-button" id="closeRecentModal"></button>
+                    <button class="close-button" id="close-recent-modal"></button>
                 </div>
-                <div class="recent-paths-list" id="recentPathsList">
+                <div class="recent-paths-list" id="recent-paths-list">
                 </div>
                 <div class="recent-paths-modal-footer">
-                    <button id="clearRecentPathsButton">Clear All</button>
+                    <button id="clear-recent-paths-button">Clear All</button>
                 </div>
             </div>
         </div>
 
-        <datalist id="recentPaths"></datalist>
+        <datalist id="recent-paths"></datalist>
 
     </body>
 </html>
