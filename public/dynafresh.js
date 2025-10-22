@@ -115,14 +115,29 @@ function updateTimeDisplay() {
   updateTimeAgoDisplay();
 }
 
+function saveFigure() {
+    const canvas = document.getElementById("canvas");
+    const filepathInput = document.getElementById("filepathInput");
+    
+    // Get current filename or use default
+    const currentPath = filepathInput.value;
+    const filename = currentPath ? `${currentPath.split('/').pop()}` : `dynafresh.png`;
+    
+    // Create download link
+    canvas.toBlob((blob) => {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        link.click();
+        URL.revokeObjectURL(url);
+    });
+}
+
 setInterval(updateTimeAgoDisplay, 1000); // update every second
 
 function showRecentPathsModal() {
   const recent = getRecentPaths();
-  if (recent.length === 0) {
-    alert("No recent paths");
-    return;
-  }
 
   const overlay = document.getElementById('recent-paths-modal-overlay');
   const list = document.getElementById('recentPathsList');
@@ -149,6 +164,12 @@ function showRecentPathsModal() {
   overlay.classList.remove('hidden');
 }
 
+function clearRecentPaths() {
+    localStorage.removeItem('recentPaths');
+    updateRecentPathsDropdown();
+    hideRecentPathsModal();
+}
+
 function hideRecentPathsModal() {
   const overlay = document.getElementById('recent-paths-modal-overlay');
   overlay.classList.add('hidden');
@@ -157,6 +178,16 @@ function hideRecentPathsModal() {
 function main() {
   window.onload = () => {
     const socket = new WebSocket("ws://localhost:" + String(port+1));
+
+    const canvas = document.getElementById("canvas");
+
+    const panzoomInstance = Panzoom(canvas, {
+      maxScale: 10,
+      minScale: 0.5,
+      bounds: true,
+      boundsPadding: 0.1
+    });
+    canvas.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
 
     setCanvasSize();
     window.addEventListener('resize', setCanvasSize);
@@ -172,33 +203,42 @@ function main() {
     });
 
     updateRecentPathsDropdown();
+    const recentPaths = getRecentPaths();
 
     socket.addEventListener("open", function () {
-      const recentPaths = getRecentPaths();
       var filepathInput = document.getElementById("filepathInput");
       
       if (recentPaths.length > 0) {
         const lastPath = recentPaths[0];
         filepathInput.value = lastPath;
-
         filepathButton.click();
       }
     });
 
+    function parseFilepathData(data) {
+      const filepath = data.split(":")[1];
+      img.src = filepath;
+      img.src = img.src.split("?")[0] + "?d=" + Date.now();
+      return filepath;
+    }
+
     socket.addEventListener("message", function (event) {
-      console.log("Message from server ", event.data);
-      // If server sends a file path, load it as image
-      if (event.data.startsWith("filepath:")) {
-        const filepath = event.data.replace("filepath:", "");
-        img.src = filepath;
-        img.src = img.src.split("?")[0] + "?d=" + Date.now();
-
-        updateTimeDisplay();
-
-      }
 
       var filepathInput = document.getElementById("filepathInput");
       filepathInput.style.border = "2px solid rgba(65, 172, 65, 1)";
+
+      console.log("Message from server ", event.data);
+
+      // initial filepath effectively overrides any recent paths
+      if (event.data.startsWith("initialFilepath:")) {
+        filepath = parseFilepathData(event.data);
+        updateTimeDisplay();
+        filepathInput.value = filepath;
+        filepathButton.click();
+      } else if (event.data.startsWith("filepath:")) {
+        filepath = parseFilepathData(event.data);
+        updateTimeDisplay();
+      }
 
     });
 
@@ -221,11 +261,22 @@ function main() {
     var closeRecentModal = document.getElementById("closeRecentModal");
     closeRecentModal.onclick = hideRecentPathsModal;
 
+    var clearRecentPathsButton = document.getElementById("clearRecentPathsButton");
+    clearRecentPathsButton.onclick = clearRecentPaths;
+
     var overlay = document.getElementById('recent-paths-modal-overlay');
     overlay.onclick = (e) => {
       if (e.target === overlay) {
         hideRecentPathsModal();
       }
+    };
+
+    var saveFigureButton = document.getElementById("saveFigureButton");
+    saveFigureButton.onclick = saveFigure;
+
+    var resetViewButton = document.getElementById("resetViewButton");
+    resetViewButton.onclick = function() {
+      panzoomInstance.reset();
     };
 
   }

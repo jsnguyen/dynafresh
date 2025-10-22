@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
     <head>
@@ -6,11 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>Dynafresh</title>
         <link rel="stylesheet" type="text/css" href="styles.css" media="screen" />
+        <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
         <script src="dynafresh.js"></script>
     </head>
     <body>
-        <h1>Dynafresh</h1>
         <div class="container">
+            <h1>Dynafresh</h1>
 
             <div class="filepath-input-container">
                 <input type="text" id="filepathInput" placeholder="Enter filepath..." list="recentPaths" />
@@ -19,15 +19,17 @@
                 <button id="filepathButton">Watch</button>
             </div>
 
+            <div id="plotContainer">
+                <canvas id="canvas"></canvas>
+            </div>
+
             <div class="metadata-container">
+                <button id="resetViewButton">Reset View</button>
+                <button id="saveFigureButton">Save Figure</button>
                 <div class="update-container">
                     <div id="updateTime"></div>
                     <div id="updateTimeAgo"></div>
                 </div>
-            </div>
-
-            <div id="plotContainer">
-                <canvas id="canvas"></canvas>
             </div>
 
             <div id="recent-paths-modal-overlay" class="hidden">
@@ -37,7 +39,9 @@
                         <button class="recent-paths-modal-close" id="closeRecentModal"></button>
                     </div>
                     <div class="recent-paths-list" id="recentPathsList">
-                        <!-- Items will be populated by JS -->
+                    </div>
+                    <div class="recent-paths-modal-footer">
+                        <button id="clearRecentPathsButton">Clear All</button>
                     </div>
                 </div>
             </div>

@@ -8,23 +8,19 @@ html, body {
 }
 
 h1 {
-    text-align: center;
     font-size: 2.2rem;
     color: #2a3a4d;
-    margin-bottom: 24px;
-    letter-spacing: 1px;
+    margin: 8px;
 }
 
 h2 {
-    margin: 0;
+    margin: 8px;
     font-size: 1.5rem;
     color: #2a3a4d;
 }
 
-
 canvas {
     display: block;
-    margin: 0 auto;
     max-width: 100%;
     background: transparent;
     transition: opacity 0.3s ease-in-out;
@@ -36,85 +32,6 @@ canvas.fade-out {
 
 canvas.fade-in {
     opacity: 1;
-}
-
-.container {
-    max-width: 800px;
-    margin: 20px auto;
-    background: #fff;
-    border-radius: 6px;
-    border: 2px solid white;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-    padding: 20px;
-}
-
-#plotContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.15s ease-in-out;
-}
-#plotContainer.fade-out {
-    opacity: 0;
-}
-
-.filepath-input-container {
-    display: flex;
-    align-items: left;
-    justify-content: left;
-    margin: 8px;
-}
-
-.filepath-display-container {
-    margin: 2px;
-    padding: 8px;
-    border: 1px solid #e5e7eb;
-    border-radius: 6px;
-    background: #f9fafb;
-}
-
-.update-container {
-    align-items: left;
-    display: flex;
-    flex-direction: column;
-    color: #64748b;
-    font-size: 1rem;
-    margin: 2px;
-    padding: 2px;
-    border-radius: 6px;
-}
-
-.metadata-container {
-    display: flex;
-    flex-direction: column;
-    margin: 8px;
-}
-
-#filepathInput {
-    width: 100%;
-    padding: 8px;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
-    background-color: #f8f8f8;
-    font-size: 1rem;
-    outline: none;
-    transition: border 0.2s;
-    margin: 0 2px 0 0;
-}
-
-#filepathInput:focus {
-    border-color: #3b82f6;
-}
-
-#filepathButton {
-    width: 15%;
-}
-
-#filePathDisplay {
-    font-size: 1rem;
-    color: #4b5563;
-    text-align: left;
-    word-break: break-all;
 }
 
 button {
@@ -133,18 +50,60 @@ button:hover {
     background: #194299;
 }
 
-/* Recent Paths Modal */
-#recent-paths-modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+.container {
+    max-width: 800px;
+    margin: 20px auto;
+    background: #fff;
+    border-radius: 6px;
+    border: 2px solid white;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.2);
+    padding: 20px;
+}
+
+.filepath-input-container {
     display: flex;
+    align-items: left;
+    justify-content: left;
+    margin: 8px;
+}
+
+.filepath-display-container {
+    margin: 2px;
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    background: #f9fafb;
+}
+
+.update-container {
+    display: flex;
+    align-items: flex-end;
+    flex-direction: column;
+    color: #64748b;
+    font-size: 0.9rem;
+}
+
+.metadata-container {
+    display: flex;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+}
+
+.metadata-container > :first-child {
+    flex: 1;
+}
+
+.metadata-container > :nth-child(2) {
+    flex: 1;
+    margin: 0 10%;  /* Center the button */
+}
+
+.metadata-container > :last-child {
+    flex: 1;
+    text-align: right;
 }
 
 .recent-paths-modal {
@@ -214,6 +173,86 @@ button:hover {
     border-color: #9ca3af;
 }
 
+.recent-paths-modal-footer {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.recent-paths-modal {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: scale(0.9);
+    transition: transform 0.2s ease-in-out;
+}
+
+#filepathInput {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background-color: #f8f8f8;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+    margin: 0 2px 0 0;
+}
+
+#filepathInput:focus {
+    border-color: #3b82f6;
+}
+
+#filepathButton {
+    width: 15%;
+}
+
+#filePathDisplay {
+    font-size: 1rem;
+    color: #4b5563;
+    text-align: left;
+    word-break: break-all;
+}
+
+/* Recent Paths Modal */
+#recent-paths-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+
+#clearRecentPathsButton {
+    padding: 8px 16px;
+    font-size: 0.95rem;
+    border: 1px solid #ef4444;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #ef4444;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#clearRecentPathsButton:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
 #recent-paths-modal-overlay {
     position: fixed;
     top: 0;
@@ -242,22 +281,22 @@ button:hover {
     pointer-events: none;
 }
 
-.recent-paths-modal {
-    background-color: white;
-    border-radius: 8px;
-    padding: 20px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    overflow: auto;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transform: scale(0.9);
-    transition: transform 0.2s ease-in-out;
+#plotContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.15s ease-in-out;
 }
+
+#plotContainer.fade-out {
+    opacity: 0;
+}
+
 
 #recent-paths-modal-overlay:not(.hidden) .recent-paths-modal {
     transform: scale(1);
 }
+
 #showRecentButton {
     padding: 6px 12px;
     font-size: 1rem;
@@ -272,4 +311,17 @@ button:hover {
 #showRecentButton:hover {
     background: #f3f4f6;
     border-color: #9ca3af;
+}
+
+#saveFigureButton {
+    background: #10b981;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+#saveFigureButton:hover {
+    background: #059669;
 }
