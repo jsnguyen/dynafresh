@@ -1,10 +1,11 @@
 html, body {
     width: 100%;
-    height: 100%;
     background: #f7f9fb;
     font-family: 'Segoe UI', Arial, sans-serif;
     margin: 0;
     min-height: 100vh;
+    scroll-behavior: smooth;
+    padding-bottom: 40px;
 }
 
 h1 {
@@ -37,27 +38,56 @@ canvas.fade-in {
 button {
     padding: 8px 16px;
     border-radius: 6px;
-    border: none;
+    border: 1px solid transparent;
     background: #3b82f6;
     color: #fff;
     font-size: 1rem;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.2s;
     margin: 0 2px;
+    font-weight: 500;
 }
 
 button:hover {
-    background: #194299;
+    background: #2563eb;
+}
+
+button:active {
+    transform: scale(0.98);
 }
 
 .container {
     max-width: 800px;
-    margin: 20px auto;
+    margin: 16px auto;
     background: #fff;
     border-radius: 6px;
     border: 2px solid white;
     box-shadow: 0 4px 24px rgba(0,0,0,0.2);
-    padding: 20px;
+    padding: 16px;
+    transition: box-shadow 0.3s ease-in-out;
+}
+
+.container.canvas-focused {
+    box-shadow: 0 0 0 2px #3b82f6,
+                0 4px 24px rgba(0,0,0,0.2);
+}
+
+.container.plot-updated {
+    animation: greenGlow 1s ease-in-out;
+}
+
+@keyframes greenGlow {
+    0% {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+    10% {
+        box-shadow: 0 0 20px 4px rgba(34, 197, 94, 0.5),
+                    0 0 12px 2px rgba(34, 197, 94, 0.3),
+                    0 4px 24px rgba(0, 0, 0, 0.2);
+    }
+    100% {
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+    }
 }
 
 .filepath-input-container {
@@ -123,32 +153,41 @@ button:hover {
     margin-bottom: 16px;
 }
 
-.recent-paths-modal-close {
-    border: none;
+.close-button {
+    border: 1px solid #ef4444;
+    background: #ffffff;
+    color: #ef4444;
     cursor: pointer;
-    padding: 0;
-    width: 30px;
-    height: 30px;
+    padding: 8px;
+    width: 32px;
+    height: 32px;
     position: relative;
+    border-radius: 6px;
+    transition: all 0.2s;
+    flex-shrink: 0;
 }
 
-.recent-paths-modal-close::before,
-.recent-paths-modal-close::after {
+.close-button:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+.close-button::before,
+.close-button::after {
     content: '';
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 20px;
+    width: 16px;
     height: 2px;
-    background-color: white;
-    transition: background-color 0.2s;
+    background-color: currentColor;
 }
 
-.recent-paths-modal-close::before {
+.close-button::before {
     transform: translate(-50%, -50%) rotate(45deg);
 }
 
-.recent-paths-modal-close::after {
+.close-button::after {
     transform: translate(-50%, -50%) rotate(-45deg);
 }
 
@@ -194,6 +233,48 @@ button:hover {
     transition: transform 0.2s ease-in-out;
 }
 
+.plot-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #d1d5db;
+    gap: 8px;
+}
+
+.plot-header .plot-filepath-input {
+    flex: 1;
+    padding: 0.5rem;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background-color: #f8f8f8;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+    margin: 0;
+    box-sizing: border-box;
+    line-height: 1.5;
+}
+
+.plot-header .plot-filepath-input:focus {
+    border-color: #3b82f6;
+}
+
+.plot-header .recent-button,
+.plot-header .close-button {
+    flex-shrink: 0;
+    padding: 0.5rem;
+    min-width: calc(1.5em + 1rem + 2px);
+    min-height: calc(1.5em + 1rem + 2px);
+    width: calc(1.5em + 1rem + 2px);
+    height: calc(1.5em + 1rem + 2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
 #filepathInput {
     width: 100%;
     padding: 8px;
@@ -207,6 +288,123 @@ button:hover {
 }
 
 #filepathInput:focus {
+    border-color: #3b82f6;
+}
+
+#mainFilepathInput {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 2px solid #3b82f6;
+    background-color: #ffffff;
+    font-size: 1.05rem;
+    outline: none;
+    transition: all 0.2s;
+    margin: 0 2px 0 0;
+}
+
+#mainFilepathInput:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+#mainWatchButton {
+    background: #10b981;
+    border: 1px solid transparent;
+    min-width: 80px;
+}
+
+#mainWatchButton:hover {
+    background: #059669;
+}
+
+.recent-button {
+    padding: 0;
+    font-size: 1rem;
+    border: 1px solid #3b82f6;
+    border-radius: 6px;
+    background: #ffffff;
+    color: #3b82f6;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: 44px;
+    height: 44px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.recent-button:hover {
+    background: #3b82f6;
+    color: #ffffff;
+}
+
+.plot-watch-button {
+    background: #10b981;
+    border: 1px solid transparent;
+    min-width: 80px;
+}
+
+.plot-watch-button:hover {
+    background: #059669;
+}
+
+.plot-reset-button {
+    background: #6b7280;
+    border: 1px solid transparent;
+    position: relative;
+}
+
+.plot-reset-button:hover {
+    background: #4b5563;
+}
+
+.plot-reset-button.button-pulse {
+    animation: pulseButton 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.plot-save-button {
+    background: #8b5cf6;
+    border: 1px solid transparent;
+    position: relative;
+}
+
+.plot-save-button:hover {
+    background: #7c3aed;
+}
+
+.plot-save-button.button-pulse {
+    animation: pulseButton 1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pulseButton {
+    0% {
+        box-shadow: none;
+    }
+    50% {
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5),
+                    0 0 0 5px rgba(59, 130, 246, 0.25);
+    }
+    100% {
+        box-shadow: none;
+    }
+}
+
+.plot-filepath-input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #d1d5db;
+    background-color: #f8f8f8;
+    font-size: 1rem;
+    outline: none;
+    transition: border 0.2s;
+    margin: 0 2px 0 0;
+}
+
+.plot-filepath-input:focus {
     border-color: #3b82f6;
 }
 
@@ -239,13 +437,13 @@ button:hover {
 
 #clearRecentPathsButton {
     padding: 8px 16px;
-    font-size: 0.95rem;
+    font-size: 1rem;
     border: 1px solid #ef4444;
     border-radius: 6px;
     background: #ffffff;
     color: #ef4444;
-    cursor: pointer;
     transition: all 0.2s;
+    font-weight: 500;
 }
 
 #clearRecentPathsButton:hover {
@@ -283,9 +481,8 @@ button:hover {
 
 #plotContainer {
     display: flex;
-    justify-content: center;
-    align-items: center;
-    transition: opacity 0.15s ease-in-out;
+    flex-direction: column;
+    gap: 20px;
 }
 
 #plotContainer.fade-out {
@@ -297,29 +494,9 @@ button:hover {
     transform: scale(1);
 }
 
-#showRecentButton {
-    padding: 6px 12px;
-    font-size: 1rem;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background: #ffffff;
-    cursor: pointer;
-    transition: all 0.1s;
-    min-width: 40px;
-}
-
-#showRecentButton:hover {
-    background: #f3f4f6;
-    border-color: #9ca3af;
-}
-
 #saveFigureButton {
     background: #10b981;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
+    border: 1px solid transparent;
 }
 
 #saveFigureButton:hover {

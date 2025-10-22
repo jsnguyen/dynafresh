@@ -9,43 +9,35 @@
         <script src="dynafresh.js"></script>
     </head>
     <body>
+
         <div class="container">
             <h1>Dynafresh</h1>
-
+            
             <div class="filepath-input-container">
-                <input type="text" id="filepathInput" placeholder="Enter filepath..." list="recentPaths" />
-                <datalist id="recentPaths"></datalist>
-                <button id="recentButton" title="Show recent paths">↓</button>
-                <button id="filepathButton">Watch</button>
+                <input type="text" id="mainFilepathInput" placeholder="Enter filepath..." list="recentPaths" />
+                <button class="recent-button" id="mainRecentButton" title="Show recent paths">↓</button>
+                <button id="mainWatchButton">Watch</button>
             </div>
-
-            <div id="plotContainer">
-                <canvas id="canvas"></canvas>
-            </div>
-
-            <div class="metadata-container">
-                <button id="resetViewButton">Reset View</button>
-                <button id="saveFigureButton">Save Figure</button>
-                <div class="update-container">
-                    <div id="updateTime"></div>
-                    <div id="updateTimeAgo"></div>
-                </div>
-            </div>
-
-            <div id="recent-paths-modal-overlay" class="hidden">
-                <div class="recent-paths-modal">
-                    <div class="recent-paths-modal-header">
-                        <h2>Recent Paths</h2>
-                        <button class="recent-paths-modal-close" id="closeRecentModal"></button>
-                    </div>
-                    <div class="recent-paths-list" id="recentPathsList">
-                    </div>
-                    <div class="recent-paths-modal-footer">
-                        <button id="clearRecentPathsButton">Clear All</button>
-                    </div>
-                </div>
-            </div>
-
         </div>
+
+        <div id="plots-container">
+        </div>
+
+        <div id="recent-paths-modal-overlay" class="hidden">
+            <div class="recent-paths-modal">
+                <div class="recent-paths-modal-header">
+                    <h2>Recent Paths</h2>
+                    <button class="close-button" id="closeRecentModal"></button>
+                </div>
+                <div class="recent-paths-list" id="recentPathsList">
+                </div>
+                <div class="recent-paths-modal-footer">
+                    <button id="clearRecentPathsButton">Clear All</button>
+                </div>
+            </div>
+        </div>
+
+        <datalist id="recentPaths"></datalist>
+
     </body>
 </html>
