@@ -9,7 +9,7 @@ Of course you could notebook-style tools (`jupyter`/`marimo`/`pluto.jl`) to achi
 ## Install
 
 ``` sh
-npm install dyre
+npm install -g @jsnguyen/dyre
 ```
 
 ## Run
