@@ -1,4 +1,10 @@
 {
+  "name": "dyre",
+  "version": "1.0.0",
+  "bin": {
+    "dyre": "./bin/dyre.js"
+  },
+
   "dependencies": {
     "chokidar": "^3.5.3",
     "commander": "^14.0.1",
