@@ -1,14 +1,14 @@
-const fs = require('fs')
-const path = require('path')
-const express = require('express')
-const chokidar = require('chokidar')
+const fs = require('fs');
+const path = require('path');
+const express = require('express');
+const chokidar = require('chokidar');
 const { Server } = require('socket.io');
 const { program } = require('commander');
 
-function tlog(msg){
-    let date_obj = new Date().toISOString()
-    console.log(`[${date_obj}] ${msg}`)
-}
+const tlog = (message) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${message}`);
+};
 
 program
   .option('-f, --file <filename>', 'input filename')
@@ -17,134 +17,160 @@ program
 program.parse(process.argv);
 
 const initialFilepath = program.opts().file ? path.resolve(program.opts().file) : null;
-const port = parseInt(program.opts().port);
+const port = Number.parseInt(program.opts().port, 10);
 
-// server parameters
-var hostname = 'localhost'
+const app = express();
+const publicDir = path.join(__dirname, 'public');
+const imagesDir = path.join(publicDir, 'images');
+fs.mkdirSync(imagesDir, { recursive: true });
 
-var app = express()
-app.use(express.static(__dirname + '/public'))
+app.use(express.static(publicDir));
+app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
 
-app.get('/', function(req, res) {
-    res.sendFile(path.join(__dirname + '/index.html'))
-})
+const server = app.listen(port, () => tlog(`Server started on port ${port}`));
 
-const server = app.listen(port, () => tlog(`Server started on port ${port}`))
-
-// socket.io on same server
-tlog(`Socket.io server starting`)
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: '*',
+    methods: ['GET', 'POST']
   }
 });
 
-io.on('connection', socket => {
+tlog('Socket.io server ready');
 
-    // send files on first connection
-    tlog('New connection');
+const createCopyPaths = (srcPath) => {
+  const filename = path.basename(srcPath);
+  return {
+    copyPath: path.join(imagesDir, filename),
+    destPath: path.join('images', filename)
+  };
+};
 
-    // Track files per connection with their plotIds
-    const imageFiles = {};
-    const plotWatchers = new Map(); // Map of plotId -> {srcPath, watcher}
-    
-    // Handle openPlots command (from plot.js)
-    socket.on('openPlots', (filepaths) => {
-      tlog(`Received command to open ${filepaths.length} plots`);
-      io.emit('openPlots', filepaths);
+io.on('connection', (socket) => {
+  tlog('Client connected');
+
+  const watcher = chokidar.watch([], {
+    ignored: /^\./,
+    persistent: true,
+    ignoreInitial: true
+  });
+
+  const plotSources = new Map(); // plotId -> srcPath
+  const fileMetadata = new Map(); // srcPath -> { copyPath, destPath, plots: Set }
+
+  const ensureMetadata = (srcPath) => {
+    if (!fileMetadata.has(srcPath)) {
+      const { copyPath, destPath } = createCopyPaths(srcPath);
+      fileMetadata.set(srcPath, {
+        copyPath,
+        destPath,
+        plots: new Set()
+      });
+    }
+    return fileMetadata.get(srcPath);
+  };
+
+  const broadcastFile = (srcPath, plotIds) => {
+    const meta = fileMetadata.get(srcPath);
+    if (!meta) return;
+
+    if (!fs.existsSync(srcPath)) {
+      plotIds.forEach((plotId) => {
+        socket.emit('filepath', { filepath: '', plotId });
+      });
+      return;
+    }
+
+    fs.copyFileSync(srcPath, meta.copyPath);
+    plotIds.forEach((plotId) => {
+      socket.emit('filepath', {
+        filepath: meta.destPath,
+        plotId
+      });
     });
+  };
 
-    // Create watcher for file changes
-    const watcher = chokidar.watch([], { ignored: /^\./, persistent: true, ignoreInitial: true });
-    
-    watcher.on('change', (changedPath) => {
-      console.log(`File changed: ${changedPath}`);
-      
-      // Find which plots are watching this file
-      for (const [plotId, info] of plotWatchers.entries()) {
-        if (info.srcPath === changedPath && imageFiles[changedPath]) {
-          fs.copyFileSync(changedPath, imageFiles[changedPath]['copyDestPath']);
-          socket.emit('filepath', {
-            filepath: imageFiles[changedPath]['destPath'],
-            plotId: plotId
-          });
-          console.log(`Sent update to plot ${plotId}`);
-        }
-      }
-    });
+  const watchPlot = ({ filepath, plotId }) => {
+    if (!filepath) return;
+    const numericPlotId = Number.parseInt(plotId, 10);
+    if (Number.isNaN(numericPlotId)) return;
 
-    function parseFilepath(srcPath, plotId){
-      if (srcPath) {
-        const copyDestPath = path.join(__dirname, 'public', 'images', path.basename(srcPath));
-        const destPath = path.join('images', path.basename(srcPath));
+    const resolvedPath = path.resolve(filepath);
+    const meta = ensureMetadata(resolvedPath);
+    meta.plots.add(numericPlotId);
 
-        console.log(`Plot ${plotId} - Copy Destination path: ${copyDestPath}`);
-        console.log(`Plot ${plotId} - Destination path: ${destPath}`);
-
-        // Store file info
-        if (!imageFiles[srcPath]) {
-          imageFiles[srcPath] = {
-            destPath: destPath,
-            copyDestPath: copyDestPath
-          };
-        }
-
-        // Track which plot is watching this file
-        plotWatchers.set(plotId, { srcPath: srcPath });
-
-        // Add to watcher if not already watched
-        if (!watcher.getWatched()[path.dirname(srcPath)]?.includes(path.basename(srcPath))) {
-          watcher.add(srcPath);
-        }
-
-        if (fs.existsSync(srcPath)) {
-          fs.copyFileSync(srcPath, copyDestPath);
-          socket.emit('filepath', { filepath: destPath, plotId: plotId });
-        } else {
-          socket.emit('filepath', { filepath: '', plotId: plotId });
-        }
+    const previousSource = plotSources.get(numericPlotId);
+    if (previousSource && previousSource !== resolvedPath) {
+      const previousMeta = fileMetadata.get(previousSource);
+      previousMeta?.plots.delete(numericPlotId);
+      if (!previousMeta?.plots.size) {
+        watcher.unwatch(previousSource);
+        fileMetadata.delete(previousSource);
       }
     }
 
-    // Handle unwatch action
-    socket.on('unwatch', (data) => {
-      tlog(`Received unwatch: ${JSON.stringify(data)}`);
-      const plotId = data.plotId;
-      if (plotWatchers.has(plotId)) {
-        const info = plotWatchers.get(plotId);
-        console.log(`Plot ${plotId} stopped watching ${info.srcPath}`);
-        plotWatchers.delete(plotId);
-        
-        // If no plots are watching this file anymore, unwatch it
-        const stillWatched = Array.from(plotWatchers.values()).some(p => p.srcPath === info.srcPath);
-        if (!stillWatched) {
-          watcher.unwatch(info.srcPath);
-          console.log(`Unwatched file: ${info.srcPath}`);
-        }
-      }
-    });
-    
-    // Handle filepath watch request
-    socket.on('watchFilepath', (data) => {
-      tlog(`Received watchFilepath: ${JSON.stringify(data)}`);
-      const srcPath = data.filepath;
-      const plotId = data.plotId;
-      console.log(`Plot ${plotId} - Source path: ${srcPath}`);
-      parseFilepath(srcPath, plotId);
-    });
+    plotSources.set(numericPlotId, resolvedPath);
+    watcher.add(resolvedPath);
+    broadcastFile(resolvedPath, [numericPlotId]);
+  };
 
-    // Cleanup on disconnect
-    socket.on('disconnect', () => {
-      tlog('Client disconnected, cleaning up watchers');
-      watcher.close();
-    });
+  const unwatchPlot = ({ plotId }) => {
+    const numericPlotId = Number.parseInt(plotId, 10);
+    if (Number.isNaN(numericPlotId)) return;
 
-    // on initial connection, if initial filename provided, send it
-    if (initialFilepath) {
-      const initialPlotId = 1; // First plot will have ID 1
-      socket.emit('initialFilepath', { filepath: initialFilepath, plotId: initialPlotId });
-      parseFilepath(initialFilepath, initialPlotId);
+    const srcPath = plotSources.get(numericPlotId);
+    if (!srcPath) return;
+
+    plotSources.delete(numericPlotId);
+    const meta = fileMetadata.get(srcPath);
+    if (!meta) return;
+
+    meta.plots.delete(numericPlotId);
+    if (!meta.plots.size) {
+      watcher.unwatch(srcPath);
+      fileMetadata.delete(srcPath);
     }
+  };
 
+  watcher.on('change', (changedPath) => {
+    const meta = fileMetadata.get(changedPath);
+    if (!meta) return;
+    broadcastFile(changedPath, Array.from(meta.plots));
+  });
+
+  socket.on('openPlots', (filepaths = []) => {
+    const resolvedPaths = filepaths.map((fp) => path.resolve(fp));
+    tlog(`Opening ${resolvedPaths.length} plots via CLI`);
+    io.emit('openPlots', resolvedPaths);
+  });
+
+  socket.on('watchFilepath', watchPlot);
+  socket.on('unwatch', unwatchPlot);
+
+  socket.on('validateFilepath', ({ filepath, requestId }) => {
+    const resolvedPath = filepath ? path.resolve(filepath) : null;
+    const exists = resolvedPath ? fs.existsSync(resolvedPath) : false;
+    socket.emit('filepathValidation', { filepath, exists, requestId });
+  });
+
+  socket.on('disconnect', () => {
+    tlog('Client disconnected');
+    watcher.close().catch(() => {});
+    plotSources.clear();
+    fileMetadata.clear();
+  });
+
+  if (initialFilepath) {
+    const initialPlotId = 1;
+    watchPlot({ filepath: initialFilepath, plotId: initialPlotId });
+    const meta = fileMetadata.get(path.resolve(initialFilepath));
+    if (meta) {
+      socket.emit('initialFilepath', {
+        filepath: meta.destPath,
+        plotId: initialPlotId
+      });
+    }
+  }
 });

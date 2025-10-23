@@ -1,10 +1,61 @@
+/* ===== COLOR PALETTE ===== */
+:root {
+    /* Pastel Colors */
+    --pastel-blue: #b8d4e8;
+    --pastel-blue-dark: #9dbdda;
+    --pastel-green: #d4e8b8;
+    --pastel-green-dark: #bdd89d;
+    --pastel-pink: #f5d3d8;
+    --pastel-pink-dark: #e8bec4;
+    --pastel-lavender: #dcd3e8;
+    --pastel-lavender-dark: #cbbdd9;
+    --pastel-coral: #f5c4b8;
+    --pastel-coral-dark: #e8afa0;
+    --pastel-mint: #c4e8d8;
+    --pastel-mint-dark: #acd8c4;
+    --pastel-lemon: #f5f0b8;
+    --pastel-lemon-dark: #e8e3a0;
+    
+    /* Background Colors */
+    --bg-cream: #f8f5f0;
+    --bg-light: #fffefb;
+    
+    /* Text Colors */
+    --text-soft: #6b7985;
+    --text-dark: #4a5663;
+    
+    /* Border Colors */
+    --border-soft: #e0dcd5;
+    
+    /* Shadow Colors */
+    --shadow-light: rgba(255, 255, 255, 0.8);
+    --shadow-dark: rgba(0, 0, 0, 0.1);
+    --shadow-darker: rgba(0, 0, 0, 0.15);
+    --shadow-darkest: rgba(0, 0, 0, 0.25);
+    --shadow-heavy: rgba(0, 0, 0, 0.5);
+    --shadow-modal: rgba(0, 0, 0, 0.2);
+    
+    /* Focus/Glow Colors */
+    --glow-blue: rgba(184, 212, 232, 0.6);
+    --glow-blue-soft: rgba(184, 212, 232, 0.4);
+    --glow-green: rgba(212, 232, 184, 0.6);
+    --glow-green-soft: rgba(212, 232, 184, 0.4);
+    --glow-pink: rgba(245, 211, 216, 0.6);
+    --glow-pink-soft: rgba(245, 211, 216, 0.4);
+    
+    /* Focus Ring */
+    --focus-ring: rgba(184, 212, 232, 0.2);
+    --focus-ring-mid: rgba(184, 212, 232, 0.25);
+    --focus-ring-strong: rgba(184, 212, 232, 0.5);
+}
+
 /* ===== BASE STYLES ===== */
 html, body {
     width: 100%;
     min-height: 100vh;
     margin: 0;
     padding-bottom: 40px;
-    background: #e8e5df;
+    background: var(--bg-cream);
     font-family: 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -17,14 +68,15 @@ html, body {
 
 h1 {
     margin: 8px;
-    font-size: 2.2rem;
-    color: #2a3a4d;
+    font-size: 1.5rem;
+    color: var(--text-dark);
+    white-space: nowrap;
 }
 
 h2 {
     margin: 8px;
     font-size: 1.5rem;
-    color: #2a3a4d;
+    color: var(--text-dark);
 }
 
 /* ===== CANVAS ===== */
@@ -48,9 +100,9 @@ button {
     padding: 8px 16px;
     margin: 0 2px;
     border-radius: 6px;
-    border: 1px solid transparent;
-    background: #3b82f6;
-    color: #fff;
+    border: none;
+    background: var(--pastel-blue);
+    color: var(--text-dark);
     font-size: 1rem;
     font-weight: 500;
     cursor: pointer;
@@ -58,7 +110,7 @@ button {
 }
 
 button:hover {
-    background: #2563eb;
+    background: var(--pastel-blue-dark);
 }
 
 button:active {
@@ -67,23 +119,24 @@ button:active {
 
 /* Main Watch Button */
 #main-watch-button {
-    background: #10b981;
-    min-width: 80px;
-    height: 44px;
+    background: var(--pastel-green);
+    padding: 8px 16px;
+    height: 36px;
+    color: var(--text-dark);
 }
 
 #main-watch-button:hover {
-    background: #059669;
+    background: var(--pastel-green-dark);
 }
 
 /* Recent Button */
 .recent-button {
     padding: 0;
-    width: 44px;
-    height: 44px;
-    border: 1px solid #3b82f6;
-    background: #ffffff;
-    color: #3b82f6;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--pastel-lavender);
+    color: var(--text-dark);
     font-size: 1rem;
     font-weight: 500;
     display: flex;
@@ -93,27 +146,37 @@ button:active {
 }
 
 .recent-button:hover {
-    background: #3b82f6;
-    color: #ffffff;
+    background: var(--pastel-lavender-dark);
+}
+
+#main-recent-button {
+    background: var(--pastel-lavender);
+    color: var(--text-dark);
+}
+
+#main-recent-button:hover {
+    background: var(--pastel-lavender-dark);
 }
 
 /* Plot Action Buttons */
 .plot-reset-button {
-    background: #6b7280;
+    background: var(--pastel-mint);
+    color: var(--text-dark);
     position: relative;
 }
 
 .plot-reset-button:hover {
-    background: #4b5563;
+    background: var(--pastel-mint-dark);
 }
 
 .plot-save-button {
-    background: #8b5cf6;
+    background: var(--pastel-blue);
+    color: var(--text-dark);
     position: relative;
 }
 
 .plot-save-button:hover {
-    background: #7c3aed;
+    background: var(--pastel-blue-dark);
 }
 
 .plot-reset-button.button-pulse,
@@ -127,8 +190,8 @@ button:active {
     }
     50% {
         box-shadow: 
-            0 0 0 3px rgba(59, 130, 246, 0.5),
-            0 0 0 5px rgba(59, 130, 246, 0.25);
+            0 0 0 3px var(--focus-ring-strong),
+            0 0 0 5px var(--focus-ring-mid);
     }
 }
 
@@ -136,15 +199,14 @@ button:active {
 .close-button {
     position: relative;
     padding: 8px;
-    border: 1px solid #ef4444;
-    background: #ffffff;
-    color: #ef4444;
+    border: none;
+    background: var(--pastel-coral);
+    color: var(--text-dark);
     flex-shrink: 0;
 }
 
 .close-button:hover {
-    background: #ef4444;
-    color: #ffffff;
+    background: var(--pastel-coral-dark);
 }
 
 .close-button::before,
@@ -167,54 +229,106 @@ button:active {
 }
 
 /* Clear Button */
-#clear-recent-paths-button {
+#clear-recent-paths-button,
+#clear-all-button {
     padding: 8px 16px;
-    border: 1px solid #ef4444;
-    background: #ffffff;
-    color: #ef4444;
+    border: none;
+    background: var(--pastel-pink);
+    color: var(--text-dark);
     font-size: 1rem;
     font-weight: 500;
+    height: 36px;
+    box-sizing: border-box;
 }
 
-#clear-recent-paths-button:hover {
-    background: #ef4444;
-    color: #ffffff;
+#clear-recent-paths-button:hover,
+#clear-all-button:hover {
+    background: var(--pastel-pink-dark);
+}
+
+/* Undo/Redo Buttons */
+#undo-button,
+#redo-button {
+    padding: 0;
+    border: none;
+    background: var(--pastel-lemon);
+    color: var(--text-dark);
+    font-size: 1rem;
+    font-weight: 500;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#undo-button:hover,
+#redo-button:hover {
+    background: var(--pastel-lemon-dark);
+}
+
+#undo-button:disabled,
+#redo-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: var(--pastel-lemon);
+}
+
+#undo-button:disabled:hover,
+#redo-button:disabled:hover {
+    background: var(--pastel-lemon);
 }
 
 /* ===== INPUTS ===== */
 #main-filepath-input {
-    flex: 1;
-    padding: 10px;
+    width: 100%;
+    padding: 8px 10px;
     margin: 0 2px;
-    border-radius: 6px;
-    border: 2px solid #3b82f6;
-    background-color: #ffffff;
+    border-radius: 4px;
+    border: 2px solid var(--pastel-blue);
+    background-color: var(--bg-light);
     font-family: 'SF Mono', Monaco, 'Consolas', 'Courier New', monospace;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
+    color: var(--text-soft);
     outline: none;
     transition: all 0.2s;
+    height: 36px;
+    box-sizing: border-box;
 }
 
 #main-filepath-input:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: var(--pastel-blue-dark);
+    box-shadow: 0 0 0 2px var(--focus-ring);
 }
 
 .plot-filepath-input {
     flex: 1;
-    padding: 8px;
+    padding: 8px 10px;
     margin: 0;
-    border-radius: 6px;
-    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    border: none;
+    background-color: var(--bg-cream);
     font-family: 'SF Mono', Monaco, 'Consolas', 'Courier New', monospace;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-soft);
     outline: none;
-    transition: border 0.2s;
+    transition: all 0.2s;
     box-sizing: border-box;
+    text-align: center;
+    line-height: 1.5;
+    min-height: 36px;
+}
+
+.plot-filepath-input:hover {
+    background-color: var(--pastel-blue);
 }
 
 .plot-filepath-input:focus {
-    border-color: #3b82f6;
+    background-color: var(--bg-light);
+    border: 1px solid var(--pastel-blue);
+    box-shadow: 0 0 0 2px var(--focus-ring);
+    text-align: left;
 }
 
 /* ===== GRID LAYOUT ===== */
@@ -251,13 +365,13 @@ button:active {
     max-width: none;
     margin: 0;
     padding: 16px;
-    background: #fff;
+    background: var(--bg-light);
     border-radius: 6px;
-    border: 1px solid #e0e0e0;
+    border: 1px solid var(--border-soft);
     box-shadow: 
-        -1px -1px 0px rgba(255, 255, 255, 0.8) inset,
-        1px 1px 0px rgba(0, 0, 0, 0.1) inset,
-        4px 4px 0px rgba(0, 0, 0, 0.15);
+        -1px -1px 0px var(--shadow-light) inset,
+        1px 1px 0px var(--shadow-dark) inset,
+        4px 4px 0px var(--shadow-darker);
     position: relative;
     transition: box-shadow 0.3s ease-in-out, transform 0.2s ease;
     cursor: grab;
@@ -288,10 +402,10 @@ button:active {
 .sortable-drag {
     opacity: 1;
     box-shadow: 
-        -1px -1px 0px rgba(255, 255, 255, 0.8) inset,
-        1px 1px 0px rgba(0, 0, 0, 0.1) inset,
-        0 0 30px rgba(0, 0, 0, 0.5),
-        8px 8px 0px rgba(0, 0, 0, 0.25);
+        -1px -1px 0px var(--shadow-light) inset,
+        1px 1px 0px var(--shadow-dark) inset,
+        0 0 30px var(--shadow-heavy),
+        8px 8px 0px var(--shadow-darkest);
     transform: rotate(2deg);
 }
 
@@ -301,10 +415,10 @@ button:active {
 
 .container.canvas-focused {
     box-shadow: 
-        -1px -1px 0px rgba(255, 255, 255, 0.8) inset,
-        1px 1px 0px rgba(0, 0, 0, 0.1) inset,
-        4px 4px 0px rgba(0, 0, 0, 0.15),
-        0 0 0 3px #3b82f6;
+        -1px -1px 0px var(--shadow-light) inset,
+        1px 1px 0px var(--shadow-dark) inset,
+        4px 4px 0px var(--shadow-darker),
+        0 0 0 3px var(--pastel-blue);
 }
 
 /* Glow Effect Layer */
@@ -328,44 +442,113 @@ button:active {
 @keyframes glowEffect {
     0%, 100% {
         opacity: 0;
-        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+        box-shadow: 0 0 0 0 transparent;
     }
     10% {
         opacity: 1;
         box-shadow: 
-            0 0 20px 4px rgba(34, 197, 94, 0.5),
-            0 0 12px 2px rgba(34, 197, 94, 0.3);
+            0 0 20px 4px var(--glow-green),
+            0 0 12px 2px var(--glow-green-soft);
+    }
+}
+
+.container.plot-duplicate::after {
+    animation: duplicateGlowEffect 1s ease-in-out;
+}
+
+@keyframes duplicateGlowEffect {
+    0%, 100% {
+        opacity: 0;
+        box-shadow: 0 0 0 0 transparent;
+    }
+    10% {
+        opacity: 1;
+        box-shadow: 
+            0 0 20px 4px var(--glow-blue),
+            0 0 12px 2px var(--glow-blue-soft);
+    }
+}
+
+.container.plot-error::after {
+    animation: errorGlowEffect 1s ease-in-out;
+}
+
+@keyframes errorGlowEffect {
+    0%, 100% {
+        opacity: 0;
+        box-shadow: 0 0 0 0 transparent;
+    }
+    10% {
+        opacity: 1;
+        box-shadow: 
+            0 0 20px 4px var(--glow-pink),
+            0 0 12px 2px var(--glow-pink-soft);
     }
 }
 
 /* ===== CONTAINER SECTIONS ===== */
+.main-header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+}
+
+.main-header-top > h1 {
+    padding-right: 16px;
+    border-right: 1px solid var(--border-soft);
+}
+
 .filepath-input-container {
     display: flex;
     align-items: center;
-    margin: 8px;
+    flex: 1;
+    gap: 4px;
+    padding-right: 16px;
+    border-right: 1px solid var(--border-soft);
+}
+
+.filepath-input-container .filepath-input-wrapper {
+    flex: 1;
+}
+
+.header-button-group {
+    display: flex;
+    gap: 4px;
+    flex-shrink: 0;
 }
 
 .plot-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
     padding-bottom: 16px;
-    border-bottom: 1px solid #d1d5db;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-soft);
     gap: 8px;
 }
 
+.plot-header .filepath-input-wrapper {
+    flex: 1;
+}
+
 .plot-header .plot-filepath-input {
+    width: 100%;
     line-height: 1.5;
 }
 
-.plot-header .recent-button,
-.plot-header .close-button {
+.plot-header-buttons {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.plot-header-buttons button {
     padding: 0.5rem;
-    min-width: calc(1.5em + 1rem + 2px);
-    min-height: calc(1.5em + 1rem + 2px);
-    width: calc(1.5em + 1rem + 2px);
-    height: calc(1.5em + 1rem + 2px);
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -377,6 +560,24 @@ button:active {
     align-items: center;
     justify-content: center;
     min-height: 0;
+    position: relative;
+}
+
+.plot-error-message {
+    display: none;
+    font-size: 1.2rem;
+    color: var(--pastel-coral-dark);
+    font-weight: 600;
+    text-align: center;
+    padding: 20px;
+}
+
+.plot-canvas-container.has-error .plot-error-message {
+    display: block;
+}
+
+.plot-canvas-container.has-error canvas {
+    display: none;
 }
 
 .metadata-container {
@@ -385,110 +586,76 @@ button:active {
     align-items: center;
     margin-top: 16px;
     padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
+    gap: 8px;
 }
 
-.metadata-container > :first-child,
-.metadata-container > :nth-child(2),
-.metadata-container > :last-child {
-    flex: 1;
-}
-
-.metadata-container > :nth-child(2) {
-    margin: 0 10%;
-}
-
-.metadata-container > :last-child {
-    text-align: right;
+.metadata-container .plot-reset-button,
+.metadata-container .plot-save-button {
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
 }
 
 .update-container {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    color: #64748b;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-soft);
     font-size: 0.9rem;
 }
 
-/* ===== MODALS ===== */
-#recent-paths-modal-overlay {
-    position: fixed;
-    top: 0;
+.plot-update-time,
+.plot-update-time-ago {
+    display: inline;
+}
+
+/* ===== DROPDOWNS ===== */
+.filepath-input-wrapper {
+    position: relative;
+    flex: 1;
+}
+
+.recent-paths-dropdown {
+    position: absolute;
+    top: 100%;
     left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    z-index: 1000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease-in-out;
-}
-
-#recent-paths-modal-overlay:not(.hidden) {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-#recent-paths-modal-overlay:not(.hidden) .recent-paths-modal {
-    transform: scale(1);
-}
-
-.recent-paths-modal {
-    padding: 20px;
-    max-width: 600px;
-    width: 90%;
-    max-height: 80vh;
-    background-color: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    overflow: auto;
-    transform: scale(0.9);
-    transition: transform 0.2s ease-in-out;
-}
-
-.recent-paths-modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.recent-paths-modal-header .close-button {
-    width: 40px;
-    height: 40px;
-    padding: 0;
-}
-
-.recent-paths-list {
+    right: 0;
+    margin-top: 4px;
+    max-height: 300px;
+    overflow-y: auto;
+    background-color: var(--bg-light);
+    border: 2px solid var(--border-soft);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px var(--shadow-modal);
+    z-index: 100;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 4px;
+    padding: 8px;
+}
+
+.recent-paths-dropdown.hidden {
+    display: none;
 }
 
 .recent-path-item {
-    padding: 8px;
-    border: 1px solid #d1d5db;
-    border-radius: 6px;
-    background-color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: var(--pastel-coral);
     cursor: pointer;
     word-break: break-all;
     transition: all 0.2s;
+    color: var(--text-dark);
+    font-family: 'SF Mono', Monaco, 'Consolas', 'Courier New', monospace;
+    font-size: 0.85rem;
 }
 
 .recent-path-item:hover {
-    background-color: #f3f4f6;
-    border-color: #9ca3af;
-}
-
-.recent-paths-modal-footer {
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid #e5e7eb;
-    display: flex;
-    justify-content: flex-end;
+    background-color: var(--pastel-coral-dark);
 }

@@ -3,42 +3,39 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Dynafresh</title>
+        <title>Dyre</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
         <link rel="stylesheet" type="text/css" href="styles.css" media="screen" />
         <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
         <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/relativeTime.js"></script>
-        <script src="dynafresh.js"></script>
+        <script src="dyre.js"></script>
     </head>
     <body>
 
         <div class="container main-header">
-            <h1>Dynafresh</h1>
-            
-            <div class="filepath-input-container">
-                <input type="text" id="main-filepath-input" placeholder="Enter filepath..." />
-                <button class="recent-button" id="main-recent-button" title="Show recent paths">↓</button>
-                <button id="main-watch-button">Watch</button>
+            <div class="main-header-top">
+                <h1>Dyre</h1>
+                
+                <div class="filepath-input-container">
+                    <div class="filepath-input-wrapper">
+                        <input type="text" id="main-filepath-input" placeholder="Enter filepath..." />
+                        <div class="recent-paths-dropdown hidden" id="main-recent-dropdown"></div>
+                    </div>
+                    <button id="main-watch-button">Watch</button>
+                </div>
+                
+                <div class="header-button-group">
+                    <button id="undo-button" title="Undo (Ctrl+Z)"><i class="fas fa-undo"></i></button>
+                    <button id="redo-button" title="Redo (Ctrl+Shift+Z)"><i class="fas fa-redo"></i></button>
+                    <button id="clear-all-button" title="Close all plots">Clear All</button>
+                </div>
             </div>
         </div>
 
         <div id="plots-container">
-        </div>
-
-        <div id="recent-paths-modal-overlay" class="hidden">
-            <div class="recent-paths-modal">
-                <div class="recent-paths-modal-header">
-                    <h2>Recent Paths</h2>
-                    <button class="close-button" id="close-recent-modal"></button>
-                </div>
-                <div class="recent-paths-list" id="recent-paths-list">
-                </div>
-                <div class="recent-paths-modal-footer">
-                    <button id="clear-recent-paths-button">Clear All</button>
-                </div>
-            </div>
         </div>
 
     </body>

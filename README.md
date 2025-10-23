@@ -1,4 +1,4 @@
-# Dynafresh
+# Dyre
 
 ## Install
 
