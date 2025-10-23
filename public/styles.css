@@ -364,7 +364,7 @@ button:active {
     flex-direction: column;
     max-width: none;
     margin: 0;
-    padding: 16px;
+    padding: 8px;
     background: var(--bg-light);
     border-radius: 6px;
     border: 1px solid var(--border-soft);
@@ -383,6 +383,7 @@ button:active {
 
 .container.main-header {
     margin: 16px;
+    padding: 16px;
     cursor: default;
 }
 
@@ -567,9 +568,6 @@ button:active {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding-bottom: 16px;
-    margin-bottom: 8px;
-    border-bottom: 1px solid var(--border-soft);
     gap: 8px;
 }
 
@@ -608,6 +606,16 @@ button:active {
     position: relative;
 }
 
+.plot-canvas {
+    display: block;
+    box-sizing: border-box;
+    max-width: 100%;
+    border: 1px solid var(--border-soft);
+    border-radius: 4px;
+    background-color: var(--bg-light);
+    margin: 4px 0;
+}
+
 .plot-error-message {
     display: none;
     font-size: 1.2rem;
@@ -629,8 +637,6 @@ button:active {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 16px;
-    padding-top: 16px;
     gap: 8px;
 }
 
@@ -657,6 +663,7 @@ button:active {
 .plot-update-time,
 .plot-update-time-ago {
     display: inline;
+    color: inherit;
 }
 
 /* ===== DROPDOWNS ===== */
