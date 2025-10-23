@@ -6,6 +6,10 @@
         <title>Dynafresh</title>
         <link rel="stylesheet" type="text/css" href="styles.css" media="screen" />
         <script src="https://unpkg.com/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+        <script src="https://cdn.socket.io/4.8.1/socket.io.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/dayjs.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/dayjs@1.11.13/plugin/relativeTime.js"></script>
         <script src="dynafresh.js"></script>
     </head>
     <body>
@@ -14,7 +18,7 @@
             <h1>Dynafresh</h1>
             
             <div class="filepath-input-container">
-                <input type="text" id="main-filepath-input" placeholder="Enter filepath..." list="recent-paths" />
+                <input type="text" id="main-filepath-input" placeholder="Enter filepath..." />
                 <button class="recent-button" id="main-recent-button" title="Show recent paths">↓</button>
                 <button id="main-watch-button">Watch</button>
             </div>
@@ -36,8 +40,6 @@
                 </div>
             </div>
         </div>
-
-        <datalist id="recent-paths"></datalist>
 
     </body>
 </html>

@@ -37,6 +37,11 @@ class Plot {
     let isCanvasFocused = false;
     
     this.canvas.addEventListener('click', (e) => {
+      // Remove focus from all other canvases
+      document.querySelectorAll('.container.canvas-focused').forEach(container => {
+        container.classList.remove('canvas-focused');
+      });
+      
       isCanvasFocused = true;
       this.container.classList.add('canvas-focused');
       e.stopPropagation();
@@ -66,7 +71,7 @@ class Plot {
     const plotHTML = `
       <div class="container" id="plot-${this.plotId}">
         <div class="plot-header">
-          <input type="text" class="plot-filepath-input" placeholder="Enter filepath..." list="recent-paths" />
+          <input type="text" class="plot-filepath-input" placeholder="Enter filepath..." />
           <button class="recent-button" title="Show recent paths">↓</button>
           <button class="close-button"></button>
         </div>
@@ -140,10 +145,10 @@ class Plot {
     const value = this.filepathInput.value.trim();
     if (value) {
       addRecentPath(value);
-      this.socket.send(JSON.stringify({ 
+      this.socket.emit('watchFilepath', { 
         filepath: value,
         plotId: this.plotId 
-      }));
+      });
       // Save session after setting up the watch
       if (plotManager && !plotManager.isRestoring) {
         plotManager.saveSession();
@@ -235,11 +240,10 @@ class Plot {
   remove() {
     // Notify server to stop watching this file
     if (this.filepath) {
-      this.socket.send(JSON.stringify({ 
-        action: 'unwatch',
+      this.socket.emit('unwatch', { 
         filepath: this.filepath,
         plotId: this.plotId 
-      }));
+      });
     }
     
     // Remove from DOM
@@ -256,6 +260,33 @@ class PlotManager {
     this.plots = new Map();
     this.nextPlotId = 1;
     this.isRestoring = false; // Flag to prevent saving during restoration
+    this.sortable = null;
+    this.initializeSortable();
+    this.setupSocketHandlers();
+  }
+
+  initializeSortable() {
+    const plotsContainer = document.getElementById('plots-container');
+    this.sortable = Sortable.create(plotsContainer, {
+      animation: 150,
+      handle: '.container:not(.main-header)',
+      filter: '.main-header',
+      draggable: '.container:not(.main-header)',
+      ghostClass: 'sortable-ghost',
+      chosenClass: 'sortable-chosen',
+      dragClass: 'sortable-drag',
+      swapThreshold: 0.65,
+      onStart: () => {
+        // Disable dense packing during drag
+        plotsContainer.style.gridAutoFlow = 'row';
+      },
+      onEnd: () => {
+        // Re-enable dense packing after drag
+        plotsContainer.style.gridAutoFlow = 'dense';
+        // Save the new order after dragging
+        this.saveSession();
+      }
+    });
   }
 
   createPlot(filepath = null) {
@@ -328,13 +359,23 @@ class PlotManager {
 
   // Save current session to localStorage
   saveSession() {
-    const session = {
-      plots: Array.from(this.plots.values())
-        .map(plot => ({
-          filepath: plot.filepathInput ? plot.filepathInput.value : ''
-        }))
-        .filter(p => p.filepath) // Only save plots with filepaths
-    };
+    // Get plots in DOM order
+    const plotsContainer = document.getElementById('plots-container');
+    const plotElements = plotsContainer.querySelectorAll('.container:not(.main-header)');
+    
+    const plots = Array.from(plotElements).map(element => {
+      const plotId = parseInt(element.id.replace('plot-', ''));
+      const plot = this.plots.get(plotId);
+      if (plot && plot.filepathInput) {
+        return {
+          plotId: plotId,
+          filepath: plot.filepathInput.value || ''
+        };
+      }
+      return null;
+    }).filter(p => p && p.filepath); // Only save plots with filepaths
+    
+    const session = { plots };
     console.log('Saving session:', session);
     localStorage.setItem('dynafreshSession', JSON.stringify(session));
   }
@@ -377,20 +418,34 @@ class PlotManager {
     return false;
   }
 
-  handleMessage(data) {
-    // Parse message from server
-    let plotId, filepath;
-
-    if (data.startsWith("initialFilepath:") || data.startsWith("filepath:")) {
-      const parts = data.split(":");
-      filepath = parts[1];
-      plotId = parseInt(parts[2]) || this.getFirstPlotId();
-    }
-
-    const plot = this.getPlot(plotId);
-    if (plot) {
-      plot.loadImage(filepath);
-    }
+  setupSocketHandlers() {
+    // Handle openPlots command
+    this.socket.on('openPlots', (filepaths) => {
+      console.log('Received openPlots command for', filepaths.length, 'files');
+      filepaths.forEach(filepath => {
+        this.watchFilepath(filepath);
+      });
+      // Save session after adding all plots
+      this.saveSession();
+    });
+    
+    // Handle filepath updates
+    this.socket.on('filepath', (data) => {
+      const { filepath, plotId } = data;
+      const plot = this.getPlot(plotId);
+      if (plot) {
+        plot.loadImage(filepath);
+      }
+    });
+    
+    // Handle initial filepath on connection
+    this.socket.on('initialFilepath', (data) => {
+      const { filepath, plotId } = data;
+      const plot = this.getPlot(plotId);
+      if (plot) {
+        plot.loadImage(filepath);
+      }
+    });
   }
 
   getFirstPlotId() {
@@ -398,21 +453,11 @@ class PlotManager {
   }
 }
 
+// Configure dayjs with relativeTime plugin
+dayjs.extend(dayjs_plugin_relativeTime);
+
 function timeAgo(date) {
-  const now = new Date();
-  const diffMs = now - date;
-  const diffSec = Math.round(diffMs / 1000);
-
-  if (diffSec <= 1) return `(${diffSec} sec ago)`;
-  if (diffSec < 60) return `(${diffSec} secs ago)`;
-
-  const diffMin = Math.round(diffSec / 60);
-  if (diffMin <= 1) return `(${diffMin} min ago)`;
-  if (diffMin < 60) return `(${diffMin} mins ago)`;
-
-  const diffHr = Math.round(diffMin / 60);
-  if (diffHr <= 1) return `(${diffHr} hr ago)`;
-  if (diffHr < 24) return `(${diffHr} hrs ago)`;
+  return `(${dayjs(date).fromNow()})`;
 }
 
 function getRecentPaths() {
@@ -429,40 +474,10 @@ function addRecentPath(filepath, maxpaths=10) {
     // Keep only last 10
     recent = recent.slice(0, maxpaths);
     localStorage.setItem('recentPaths', JSON.stringify(recent));
-    updateRecentPathsDropdown();
 }
-
-function updateRecentPathsDropdown() {
-    const datalist = document.getElementById('recent-paths');
-    const recent = getRecentPaths();
-    datalist.innerHTML = recent.map(path => 
-        `<option value="${path}">${path}</option>`
-    ).join('');
-}
-
-function timedRefresh(img) {
-  // just change src attribute, will always trigger the onload callback
-  img.src = img.src.split("?")[0] + "?d=" + Date.now();
-}
-
-function setCanvasSize() {
-  var canvas = document.getElementById("canvas");
-  var container = canvas.parentElement;
-  var style = window.getComputedStyle(container);
-  var width = parseInt(style.getPropertyValue('width'));
-  var height = parseInt(style.getPropertyValue('height'));
-  if (!width || !height) {
-    width = 600;
-    height = 400;
-  }
-  canvas.width = width;
-  canvas.height = height;
-}
-
 
 function clearRecentPaths() {
     localStorage.removeItem('recentPaths');
-    updateRecentPathsDropdown();
     hideRecentPathsModal();
 }
 
@@ -505,11 +520,10 @@ let plotManager;
 
 function main() {
   window.onload = () => {
-    const socket = new WebSocket("ws://localhost:" + String(port+1));
+    const socket = io(`http://localhost:${port}`);
 
     plotManager = new PlotManager(socket);
 
-    updateRecentPathsDropdown();
     const recentPaths = getRecentPaths();
 
     // Main filepath input handlers
@@ -536,7 +550,8 @@ function main() {
       }
     });
 
-    socket.addEventListener("open", function () {
+    socket.on("connect", function () {
+      console.log("Connected to server");
       // Try to restore previous session first
       const sessionRestored = plotManager.restoreSession();
       
@@ -546,24 +561,14 @@ function main() {
       }
     });
 
-    socket.addEventListener("message", function (event) {
-      console.log("Message from server", event.data);
-      plotManager.handleMessage(event.data);
-    });
-
-    const addPlotButton = document.getElementById("add-plot-button");
-    if (addPlotButton) {
-      addPlotButton.onclick = () => plotManager.createPlot();
-    }
-
     // Recent paths modal handlers
-    var closeRecentModal = document.getElementById("close-recent-modal");
+    const closeRecentModal = document.getElementById("close-recent-modal");
     closeRecentModal.onclick = hideRecentPathsModal;
     
-    var clearRecentPathsButton = document.getElementById("clear-recent-paths-button");
+    const clearRecentPathsButton = document.getElementById("clear-recent-paths-button");
     clearRecentPathsButton.onclick = clearRecentPaths;
 
-    var overlay = document.getElementById('recent-paths-modal-overlay');
+    const overlay = document.getElementById('recent-paths-modal-overlay');
     overlay.onclick = (e) => {
       if (e.target === overlay) {
         hideRecentPathsModal();
