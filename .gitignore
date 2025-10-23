@@ -4,3 +4,4 @@ package-lock.json
 .DS_Store
 *.pdf
 *.png
+public/images/

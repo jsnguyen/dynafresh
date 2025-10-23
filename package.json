@@ -2,7 +2,8 @@
   "name": "dyre",
   "version": "1.0.0",
   "bin": {
-    "dyre": "./bin/dyre.js"
+    "dyre": "bin/dyre",
+    "dyopen": "bin/dyopen"
   },
 
   "dependencies": {
