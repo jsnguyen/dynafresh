@@ -1,11 +1,26 @@
 {
-  "name": "dyre",
+  "name": "@hawtshawt/dyre",
   "version": "1.0.0",
-  "bin": {
-    "dyre": "bin/dyre",
-    "dyopen": "bin/dyopen"
+  "description": "Dynamic refreshing of images.",
+  "homepage": "https://github.com/jsnguyen/dyre#readme",
+  "bugs": {
+    "url": "https://github.com/jsnguyen/dyre/issues"
   },
-
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jsnguyen/dyre.git"
+  },
+  "license": "ISC",
+  "author": "Jayke Nguyen",
+  "type": "commonjs",
+  "main": "app.js",
+  "bin": {
+    "dyre": "./bin/dyre",
+    "dyopen": "./bin/dyopen"
+  },
+  "scripts": {
+    "test": "dyre"
+  },
   "dependencies": {
     "chokidar": "^3.5.3",
     "commander": "^14.0.1",
@@ -13,5 +28,6 @@
     "express": "^4.17.2",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
-  }
+  },
+  "devDependencies": {}
 }
