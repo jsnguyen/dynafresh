@@ -1,2 +1,14 @@
 #!/usr/bin/env node
-require('../app');
+
+(async () => {
+  require('../app');
+
+  const { default: open } = await import('open');
+
+  setTimeout(() => {
+    open('http://localhost:12301').catch((err) => {
+      console.error('Failed to launch browser:', err);
+    });
+  }, 250);
+
+})();

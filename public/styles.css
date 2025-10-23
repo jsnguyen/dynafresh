@@ -494,9 +494,54 @@ button:active {
     gap: 16px;
 }
 
-.main-header-top > h1 {
+.logo-block {
+    display: flex;
+    align-items: center;
+    gap: 16px;
     padding-right: 16px;
     border-right: 1px solid var(--border-soft);
+}
+
+.logo-block h1 {
+    margin: 0;
+    font-size: 1rem;
+}
+
+.connection-status {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-soft);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-left: 16px;
+    border-left: 1px solid var(--border-soft);
+}
+
+.connection-status.status-connected {
+    color: var(--pastel-green-dark);
+    font-weight: 600;
+}
+
+.connection-status.status-connecting {
+    color: var(--text-soft);
+    font-style: italic;
+}
+
+.connection-status.status-disconnected {
+    color: var(--pastel-pink-dark);
+    font-weight: 600;
+}
+
+.container.main-header.connection-lost {
+    border-color: var(--pastel-pink-dark);
+}
+
+.container.main-header.connection-lost::after {
+    opacity: 1;
+    box-shadow: 
+        0 0 30px 8px var(--glow-pink),
+        0 0 20px 6px var(--glow-pink-soft);
 }
 
 .filepath-input-container {

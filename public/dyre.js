@@ -775,11 +775,36 @@ const main = () => {
     plotManager = new PlotManager(socket);
 
     const mainHeader = document.querySelector('.container.main-header');
+    const connectionStatusEl = document.getElementById('connection-status');
     const mainFilepathInput = document.getElementById('main-filepath-input');
     const mainWatchButton = document.getElementById('main-watch-button');
     const clearAllButton = document.getElementById('clear-all-button');
     const undoButton = document.getElementById('undo-button');
     const redoButton = document.getElementById('redo-button');
+
+    const setConnectionStatus = (state, message) => {
+      if (!mainHeader || !connectionStatusEl) return;
+
+      connectionStatusEl.textContent = message;
+      connectionStatusEl.classList.remove('hidden', 'status-connected', 'status-disconnected', 'status-connecting');
+      mainHeader.classList.remove('connection-lost');
+
+      if (state === 'connected') {
+        connectionStatusEl.classList.add('status-connected');
+      } else if (state === 'disconnected') {
+        connectionStatusEl.classList.add('status-disconnected');
+        mainHeader.classList.add('connection-lost');
+      } else {
+        connectionStatusEl.classList.add('status-connecting');
+      }
+    };
+
+    const handleDisconnected = (message) => {
+      setConnectionStatus('disconnected', message);
+    };
+
+    // Show initial state while connecting
+    setConnectionStatus('connecting', 'Connecting...');
 
     mainWatchButton.addEventListener('click', () => {
       const filepath = mainFilepathInput.value.trim();
@@ -839,12 +864,31 @@ const main = () => {
     plotManager.updateUndoRedoButtons();
 
     socket.on('connect', () => {
+      setConnectionStatus('connected', 'Connected');
       const restored = plotManager.restoreSession();
       if (!restored) {
         plotManager.resubscribePlots();
       }
       plotManager.updateUndoRedoButtons();
     });
+
+    socket.on('disconnect', () => {
+      handleDisconnected('Not connected');
+    });
+
+    socket.on('connect_error', () => {
+      handleDisconnected('Connection lost. Retrying...');
+    });
+
+    if (socket.io?.on) {
+      socket.io.on('reconnect_attempt', () => {
+        setConnectionStatus('connecting', 'Reconnecting...');
+      });
+
+      socket.io.on('reconnect_failed', () => {
+        handleDisconnected('Unable to reconnect');
+      });
+    }
   });
 };
 
