@@ -15,8 +15,8 @@
   "type": "commonjs",
   "main": "app.js",
   "bin": {
-    "dyre": "./bin/dyre",
-    "dyopen": "./bin/dyopen"
+    "dyre": "bin/dyre",
+    "dyopen": "bin/dyopen"
   },
   "scripts": {
     "test": "dyre"
