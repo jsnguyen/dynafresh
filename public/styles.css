@@ -36,17 +36,17 @@
     --shadow-modal: rgba(0, 0, 0, 0.2);
     
     /* Focus/Glow Colors */
-    --glow-blue: rgba(184, 212, 232, 0.6);
-    --glow-blue-soft: rgba(184, 212, 232, 0.4);
-    --glow-green: rgba(212, 232, 184, 0.6);
-    --glow-green-soft: rgba(212, 232, 184, 0.4);
-    --glow-pink: rgba(245, 211, 216, 0.6);
-    --glow-pink-soft: rgba(245, 211, 216, 0.4);
+    --glow-blue: rgba(184, 212, 232, 0.8);
+    --glow-blue-soft: rgba(184, 212, 232, 0.8);
+    --glow-green: rgba(190, 252, 104, 0.8);
+    --glow-green-soft: rgb(212, 232, 184, 0.8);
+    --glow-pink: rgba(245, 211, 216, 0.8);
+    --glow-pink-soft: rgba(245, 211, 216, 0.8);
     
     /* Focus Ring */
-    --focus-ring: rgba(184, 212, 232, 0.2);
-    --focus-ring-mid: rgba(184, 212, 232, 0.25);
-    --focus-ring-strong: rgba(184, 212, 232, 0.5);
+    --focus-ring: rgba(184, 212, 232, 0.9);
+    --focus-ring-mid: rgba(184, 212, 232, 0.9);
+    --focus-ring-strong: rgba(184, 212, 232, 0.9);
 }
 
 /* ===== BASE STYLES ===== */
@@ -375,6 +375,19 @@ button:active {
     position: relative;
     transition: box-shadow 0.3s ease-in-out, transform 0.2s ease;
     cursor: grab;
+}
+
+.container.plot-updated {
+    animation: updateBounce 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes updateBounce {
+    0%, 100% {
+        transform: scale(1);
+    }
+    45% {
+        transform: scale(1.02);
+    }
 }
 
 .container:active:not(.main-header) {
