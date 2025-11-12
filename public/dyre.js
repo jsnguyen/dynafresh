@@ -43,11 +43,6 @@ const addRecentPath = (filepath) => {
   setRecentPaths(recent);
 };
 
-const clearRecentPaths = () => {
-  localStorage.removeItem(RECENT_PATHS_KEY);
-  hideMainRecentPathsDropdown();
-};
-
 const hideMainRecentPathsDropdown = () => {
   const dropdown = document.getElementById('main-recent-dropdown');
   if (dropdown) {
@@ -100,13 +95,11 @@ class Plot {
     this.manager = manager;
     this.fullFilepath = '';
     this.filepath = null;
-    this.lastUpdateTime = null;
     this.processingBlur = false;
     this.isCanvasFocused = false;
     this.updateInterval = null;
     this.historyEntries = [];
     this.historyOffset = 0;
-    this.historyViewingSnapshot = false;
     this.currentHistoryTimestamp = null;
     this.pendingLiveImage = null;
 
@@ -126,6 +119,7 @@ class Plot {
     this.configurePanzoom();
     this.bindEvents();
     this.startUpdateTicker();
+    this.updateHistoryControls();
 
     if (filepath) {
       this.watchFile(filepath, { recordHistory: false });
@@ -255,14 +249,10 @@ class Plot {
   onFilepathBlur() {
     if (this.processingBlur) return;
     this.processingBlur = true;
-
     const value = this.filepathInput.value.trim();
-    if (!value) {
-      this.processingBlur = false;
-      return;
+    if (value) {
+      this.watchFile(value);
     }
-
-    this.watchFile(value);
     this.processingBlur = false;
   }
 
@@ -383,11 +373,7 @@ class Plot {
       return;
     }
 
-    const payload = {
-      filepath,
-      timestamp: new Date()
-    };
-
+    const payload = { filepath, timestamp: new Date() };
     if (this.historyOffset > 0) {
       this.pendingLiveImage = payload;
       return;
@@ -397,7 +383,7 @@ class Plot {
     this.renderLiveImage(payload);
   }
 
-  renderLiveImage({ filepath, timestamp }) {
+  renderLiveImage({ filepath, timestamp }, shouldHighlight = true) {
     this.canvasContainer.classList.remove('has-error');
     if (this.fullFilepath) {
       addRecentPath(this.fullFilepath);
@@ -405,39 +391,36 @@ class Plot {
 
     this.filepath = filepath;
     this.img.src = `${filepath}?d=${Date.now()}`;
-    this.lastUpdateTime = timestamp || new Date();
-    this.currentHistoryTimestamp = this.lastUpdateTime;
-    this.historyViewingSnapshot = false;
+    this.currentHistoryTimestamp = timestamp || new Date();
     this.updateTimeDisplay();
-    highlight(this.container, 'plot-updated');
+    if (shouldHighlight) {
+      highlight(this.container, 'plot-updated');
+    }
   }
 
-  renderHistorySnapshot(entry) {
+  renderHistorySnapshot(entry, shouldHighlight = true) {
     if (!entry?.filepath) return;
     this.canvasContainer.classList.remove('has-error');
     this.filepath = entry.filepath;
     this.img.src = `${entry.filepath}?h=${Date.now()}`;
-    this.lastUpdateTime = entry.timestamp ? new Date(entry.timestamp) : null;
-    this.currentHistoryTimestamp = this.lastUpdateTime;
-    this.historyViewingSnapshot = this.historyOffset > 0;
+    this.currentHistoryTimestamp = entry.timestamp ? new Date(entry.timestamp) : null;
     this.updateTimeDisplay();
-    highlight(this.container, 'plot-updated');
+    if (shouldHighlight) {
+      highlight(this.container, 'plot-updated');
+    }
   }
 
   displaySelectedHistoryEntry() {
     const entry = this.getSelectedHistoryEntry();
     if (!entry) return;
 
-    if (this.historyOffset === 0) {
-      this.historyViewingSnapshot = false;
-      if (this.pendingLiveImage) {
-        this.renderLiveImage(this.pendingLiveImage);
-        this.pendingLiveImage = null;
-        return;
-      }
+    if (this.historyOffset === 0 && this.pendingLiveImage) {
+      this.renderLiveImage(this.pendingLiveImage, false);
+      this.pendingLiveImage = null;
+      return;
     }
 
-    this.renderHistorySnapshot(entry);
+    this.renderHistorySnapshot(entry, false);
   }
 
   drawImage(applyFade = false) {
@@ -514,29 +497,25 @@ class Plot {
   }
 
   setHistory(entries = []) {
-    const normalized = Array.isArray(entries) ? entries : [];
+    const list = Array.isArray(entries) ? entries : [];
     const wasAtLatest = this.historyOffset === 0;
-    this.historyEntries = normalized;
+    this.historyEntries = list;
 
-    if (!this.historyEntries.length) {
+    if (!list.length) {
       this.historyOffset = 0;
-      this.historyViewingSnapshot = false;
       this.pendingLiveImage = null;
       this.updateHistoryControls();
       return;
     }
 
-    if (wasAtLatest) {
-      this.historyOffset = 0;
-      this.historyViewingSnapshot = false;
-    } else {
-      this.historyOffset = Math.min(this.historyOffset + 1, this.historyEntries.length - 1);
-    }
-
+    this.historyOffset = wasAtLatest ? 0 : Math.min(this.historyOffset + 1, list.length - 1);
     this.updateHistoryControls();
 
     if (this.historyOffset > 0) {
       this.displaySelectedHistoryEntry();
+    } else if (this.pendingLiveImage) {
+      this.renderLiveImage(this.pendingLiveImage);
+      this.pendingLiveImage = null;
     }
   }
 
@@ -548,11 +527,7 @@ class Plot {
   }
 
   updateHistoryControls() {
-    if (
-      !this.historyPositionElement ||
-      !this.historyTimeElement ||
-      !this.historyTimeAgoElement
-    ) {
+    if (!this.historyPositionElement || !this.historyTimeElement || !this.historyTimeAgoElement) {
       return;
     }
 
@@ -566,7 +541,6 @@ class Plot {
       return;
     }
 
-    const display = entry.srcPath || entry.filepath || '(unknown)';
     const positionLabel = this.historyOffset ? `${this.historyOffset} back` : 'Most recent';
     this.historyPositionElement.textContent = `· ${positionLabel}`;
     this.currentHistoryTimestamp = entry.timestamp ? new Date(entry.timestamp) : null;
@@ -584,20 +558,11 @@ class Plot {
   navigateHistory(direction) {
     if (!this.historyEntries.length) return;
     const maxOffset = this.historyEntries.length - 1;
-    const movingOlder = direction === 'older';
-    const movingNewer = direction === 'newer';
-    let changed = false;
+    const step = direction === 'older' ? 1 : -1;
+    const nextOffset = this.historyOffset + step;
+    if (nextOffset < 0 || nextOffset > maxOffset) return;
 
-    if (movingOlder && this.historyOffset < maxOffset) {
-      this.historyOffset += 1;
-      changed = true;
-    } else if (movingNewer && this.historyOffset > 0) {
-      this.historyOffset -= 1;
-      changed = true;
-    }
-
-    if (!changed) return;
-
+    this.historyOffset = nextOffset;
     this.updateHistoryControls();
     this.displaySelectedHistoryEntry();
   }
@@ -648,7 +613,6 @@ class PlotManager {
     }
 
     const plot = new Plot(id, this.socket, this);
-    plot.setHistory([]);
     this.plots.set(id, plot);
 
     if (filepath) {
@@ -820,6 +784,13 @@ class PlotManager {
     return null;
   }
 
+  withPlot(plotId, handler) {
+    const plot = this.plots.get(plotId);
+    if (!plot) return null;
+    handler(plot);
+    return plot;
+  }
+
   watchFilepath(filepath) {
     const target = filepath?.trim();
     if (!target) return;
@@ -897,26 +868,18 @@ class PlotManager {
   registerSocketEvents() {
     this.socket.on('openPlots', (filepaths) => {
       filepaths.forEach((filepath) => this.watchFilepath(filepath));
-      this.saveSession();
     });
 
     this.socket.on('filepath', ({ filepath, plotId }) => {
-      const plot = this.plots.get(plotId);
-      if (plot) {
-        plot.loadImage(filepath);
-      }
+      this.withPlot(plotId, (plot) => plot.loadImage(filepath));
     });
 
     this.socket.on('plotHistory', ({ plotId, history = [] }) => {
-      const plot = this.plots.get(plotId);
-      plot?.setHistory(history);
+      this.withPlot(plotId, (plot) => plot.setHistory(history));
     });
 
     this.socket.on('initialFilepath', ({ filepath, plotId }) => {
-      const plot = this.plots.get(plotId);
-      if (plot) {
-        plot.loadImage(filepath);
-      }
+      this.withPlot(plotId, (plot) => plot.loadImage(filepath));
     });
 
     this.socket.on('filepathValidation', ({ filepath, exists, requestId }) => {

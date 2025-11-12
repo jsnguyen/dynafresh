@@ -129,35 +129,6 @@ button:active {
     background: var(--pastel-green-dark);
 }
 
-/* Recent Button */
-.recent-button {
-    padding: 0;
-    width: 36px;
-    height: 36px;
-    border: none;
-    background: var(--pastel-lavender);
-    color: var(--text-dark);
-    font-size: 1rem;
-    font-weight: 500;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-}
-
-.recent-button:hover {
-    background: var(--pastel-lavender-dark);
-}
-
-#main-recent-button {
-    background: var(--pastel-lavender);
-    color: var(--text-dark);
-}
-
-#main-recent-button:hover {
-    background: var(--pastel-lavender-dark);
-}
-
 /* Plot Action Buttons */
 .plot-reset-button {
     background: var(--pastel-mint);
@@ -229,7 +200,6 @@ button:active {
 }
 
 /* Clear Button */
-#clear-recent-paths-button,
 #clear-all-button {
     padding: 8px 16px;
     border: none;
@@ -241,7 +211,6 @@ button:active {
     box-sizing: border-box;
 }
 
-#clear-recent-paths-button:hover,
 #clear-all-button:hover {
     background: var(--pastel-pink-dark);
 }
@@ -551,15 +520,6 @@ button:active {
     flex-direction: column;
     gap: 2px;
     text-align: center;
-}
-
-.plot-history-filepath {
-    font-family: 'SF Mono', Monaco, 'Consolas', 'Courier New', monospace;
-    font-size: 0.75rem;
-    color: var(--text-dark);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
 }
 
 .plot-history-meta {
