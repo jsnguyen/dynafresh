@@ -104,6 +104,11 @@ class Plot {
     this.processingBlur = false;
     this.isCanvasFocused = false;
     this.updateInterval = null;
+    this.historyEntries = [];
+    this.historyOffset = 0;
+    this.historyViewingSnapshot = false;
+    this.currentHistoryTimestamp = null;
+    this.pendingLiveImage = null;
 
     this.handleFilepathFocus = this.onFilepathFocus.bind(this);
     this.handleFilepathBlur = this.onFilepathBlur.bind(this);
@@ -112,6 +117,8 @@ class Plot {
     this.handleDocumentClick = this.onDocumentClick.bind(this);
     this.handleCanvasClick = this.onCanvasClick.bind(this);
     this.handleCanvasWheel = this.onCanvasWheel.bind(this);
+    this.handleHistoryPrev = () => this.navigateHistory('older');
+    this.handleHistoryNext = () => this.navigateHistory('newer');
 
     this.buildTemplate();
     this.cacheElements();
@@ -146,9 +153,19 @@ class Plot {
 
         <div class="metadata-container">
           <button class="plot-reset-button" title="Reset View"><i class="fas fa-arrows-to-dot"></i></button>
-          <div class="update-container">
-            <span class="plot-update-time"></span>
-            <span class="plot-update-time-ago"></span>
+          <div class="plot-history-controls">
+            <button class="plot-history-button plot-history-prev" title="Older plot"><i class="fas fa-arrow-left"></i></button>
+            <div class="plot-history-details">
+              <div class="plot-history-meta">
+                <span class="plot-history-time">
+                  <span class="plot-history-time-label">Last update:</span>
+                  <span class="plot-history-time-value">—</span>
+                  <span class="plot-history-time-ago"></span>
+                  <span class="plot-history-position">—</span>
+                </span>
+              </div>
+            </div>
+            <button class="plot-history-button plot-history-next" title="Newer plot"><i class="fas fa-arrow-right"></i></button>
           </div>
           <button class="plot-save-button" title="Save Figure"><i class="fas fa-floppy-disk"></i></button>
         </div>
@@ -163,11 +180,14 @@ class Plot {
     this.canvasContainer = this.container.querySelector('.plot-canvas-container');
     this.filepathInput = this.container.querySelector('.plot-filepath-input');
     this.dropdown = this.container.querySelector('.recent-paths-dropdown');
-    this.updateTimeElement = this.container.querySelector('.plot-update-time');
-    this.updateTimeAgoElement = this.container.querySelector('.plot-update-time-ago');
     this.closeButton = this.container.querySelector('.close-button');
     this.saveButton = this.container.querySelector('.plot-save-button');
     this.resetButton = this.container.querySelector('.plot-reset-button');
+    this.historyPrevButton = this.container.querySelector('.plot-history-prev');
+    this.historyNextButton = this.container.querySelector('.plot-history-next');
+    this.historyPositionElement = this.container.querySelector('.plot-history-position');
+    this.historyTimeElement = this.container.querySelector('.plot-history-time-value');
+    this.historyTimeAgoElement = this.container.querySelector('.plot-history-time-ago');
   }
 
   configureImage() {
@@ -188,6 +208,8 @@ class Plot {
     this.closeButton.addEventListener('click', () => this.remove());
     this.saveButton.addEventListener('click', () => this.save());
     this.resetButton.addEventListener('click', () => this.reset());
+    this.historyPrevButton?.addEventListener('click', this.handleHistoryPrev);
+    this.historyNextButton?.addEventListener('click', this.handleHistoryNext);
 
     this.filepathInput.addEventListener('focus', this.handleFilepathFocus);
     this.filepathInput.addEventListener('blur', this.handleFilepathBlur);
@@ -207,6 +229,8 @@ class Plot {
     this.canvas.removeEventListener('click', this.handleCanvasClick);
     this.canvasContainer.removeEventListener('wheel', this.handleCanvasWheel);
     document.removeEventListener('click', this.handleDocumentClick);
+    this.historyPrevButton?.removeEventListener('click', this.handleHistoryPrev);
+    this.historyNextButton?.removeEventListener('click', this.handleHistoryNext);
   }
 
   startUpdateTicker() {
@@ -314,7 +338,7 @@ class Plot {
     this.dropdown.classList.add('hidden');
   }
 
-  watchFile(filepath, { recordHistory = true, saveSession = true, force = false } = {}) {
+  watchFile(filepath, { recordHistory = true, saveSession = true, force = false, skipHistory = false } = {}) {
     const target = (typeof filepath === 'string' ? filepath : this.filepathInput.value).trim();
     if (!target) return;
 
@@ -341,7 +365,8 @@ class Plot {
 
     this.socket.emit('watchFilepath', {
       filepath: target,
-      plotId: this.plotId
+      plotId: this.plotId,
+      skipHistory
     });
 
     this.filepathInput.value = filenameFromPath(target);
@@ -358,6 +383,21 @@ class Plot {
       return;
     }
 
+    const payload = {
+      filepath,
+      timestamp: new Date()
+    };
+
+    if (this.historyOffset > 0) {
+      this.pendingLiveImage = payload;
+      return;
+    }
+
+    this.pendingLiveImage = null;
+    this.renderLiveImage(payload);
+  }
+
+  renderLiveImage({ filepath, timestamp }) {
     this.canvasContainer.classList.remove('has-error');
     if (this.fullFilepath) {
       addRecentPath(this.fullFilepath);
@@ -365,8 +405,39 @@ class Plot {
 
     this.filepath = filepath;
     this.img.src = `${filepath}?d=${Date.now()}`;
-    this.lastUpdateTime = new Date();
+    this.lastUpdateTime = timestamp || new Date();
+    this.currentHistoryTimestamp = this.lastUpdateTime;
+    this.historyViewingSnapshot = false;
+    this.updateTimeDisplay();
     highlight(this.container, 'plot-updated');
+  }
+
+  renderHistorySnapshot(entry) {
+    if (!entry?.filepath) return;
+    this.canvasContainer.classList.remove('has-error');
+    this.filepath = entry.filepath;
+    this.img.src = `${entry.filepath}?h=${Date.now()}`;
+    this.lastUpdateTime = entry.timestamp ? new Date(entry.timestamp) : null;
+    this.currentHistoryTimestamp = this.lastUpdateTime;
+    this.historyViewingSnapshot = this.historyOffset > 0;
+    this.updateTimeDisplay();
+    highlight(this.container, 'plot-updated');
+  }
+
+  displaySelectedHistoryEntry() {
+    const entry = this.getSelectedHistoryEntry();
+    if (!entry) return;
+
+    if (this.historyOffset === 0) {
+      this.historyViewingSnapshot = false;
+      if (this.pendingLiveImage) {
+        this.renderLiveImage(this.pendingLiveImage);
+        this.pendingLiveImage = null;
+        return;
+      }
+    }
+
+    this.renderHistorySnapshot(entry);
   }
 
   drawImage(applyFade = false) {
@@ -397,13 +468,16 @@ class Plot {
   }
 
   updateTimeDisplay() {
-    if (!this.lastUpdateTime) return;
-    if (this.updateTimeElement) {
-      this.updateTimeElement.textContent = `Last update: ${this.lastUpdateTime.toLocaleTimeString()}`;
+    if (!this.historyTimeElement || !this.historyTimeAgoElement) return;
+
+    if (!this.currentHistoryTimestamp) {
+      this.historyTimeElement.textContent = '—';
+      this.historyTimeAgoElement.textContent = '';
+      return;
     }
-    if (this.updateTimeAgoElement) {
-      this.updateTimeAgoElement.textContent = timeAgo(this.lastUpdateTime);
-    }
+
+    this.historyTimeElement.textContent = this.currentHistoryTimestamp.toLocaleTimeString();
+    this.historyTimeAgoElement.textContent = timeAgo(this.currentHistoryTimestamp);
   }
 
   reset() {
@@ -437,6 +511,95 @@ class Plot {
     this.stopUpdateTicker();
     this.container.remove();
     this.manager.removePlot(this.plotId, { recordHistory });
+  }
+
+  setHistory(entries = []) {
+    const normalized = Array.isArray(entries) ? entries : [];
+    const wasAtLatest = this.historyOffset === 0;
+    this.historyEntries = normalized;
+
+    if (!this.historyEntries.length) {
+      this.historyOffset = 0;
+      this.historyViewingSnapshot = false;
+      this.pendingLiveImage = null;
+      this.updateHistoryControls();
+      return;
+    }
+
+    if (wasAtLatest) {
+      this.historyOffset = 0;
+      this.historyViewingSnapshot = false;
+    } else {
+      this.historyOffset = Math.min(this.historyOffset + 1, this.historyEntries.length - 1);
+    }
+
+    this.updateHistoryControls();
+
+    if (this.historyOffset > 0) {
+      this.displaySelectedHistoryEntry();
+    }
+  }
+
+  getSelectedHistoryEntry() {
+    if (!this.historyEntries.length) return null;
+    const index = this.historyEntries.length - 1 - this.historyOffset;
+    if (index < 0 || index >= this.historyEntries.length) return null;
+    return this.historyEntries[index];
+  }
+
+  updateHistoryControls() {
+    if (
+      !this.historyPositionElement ||
+      !this.historyTimeElement ||
+      !this.historyTimeAgoElement
+    ) {
+      return;
+    }
+
+    const entry = this.getSelectedHistoryEntry();
+    if (!entry) {
+      this.historyPositionElement.textContent = '—';
+      this.currentHistoryTimestamp = null;
+      if (this.historyPrevButton) this.historyPrevButton.disabled = true;
+      if (this.historyNextButton) this.historyNextButton.disabled = true;
+      this.updateTimeDisplay();
+      return;
+    }
+
+    const display = entry.srcPath || entry.filepath || '(unknown)';
+    const positionLabel = this.historyOffset ? `${this.historyOffset} back` : 'Most recent';
+    this.historyPositionElement.textContent = `· ${positionLabel}`;
+    this.currentHistoryTimestamp = entry.timestamp ? new Date(entry.timestamp) : null;
+
+    if (this.historyPrevButton) {
+      this.historyPrevButton.disabled = this.historyOffset >= this.historyEntries.length - 1;
+    }
+    if (this.historyNextButton) {
+      this.historyNextButton.disabled = this.historyOffset === 0;
+    }
+
+    this.updateTimeDisplay();
+  }
+
+  navigateHistory(direction) {
+    if (!this.historyEntries.length) return;
+    const maxOffset = this.historyEntries.length - 1;
+    const movingOlder = direction === 'older';
+    const movingNewer = direction === 'newer';
+    let changed = false;
+
+    if (movingOlder && this.historyOffset < maxOffset) {
+      this.historyOffset += 1;
+      changed = true;
+    } else if (movingNewer && this.historyOffset > 0) {
+      this.historyOffset -= 1;
+      changed = true;
+    }
+
+    if (!changed) return;
+
+    this.updateHistoryControls();
+    this.displaySelectedHistoryEntry();
   }
 }
 
@@ -485,6 +648,7 @@ class PlotManager {
     }
 
     const plot = new Plot(id, this.socket, this);
+    plot.setHistory([]);
     this.plots.set(id, plot);
 
     if (filepath) {
@@ -743,6 +907,11 @@ class PlotManager {
       }
     });
 
+    this.socket.on('plotHistory', ({ plotId, history = [] }) => {
+      const plot = this.plots.get(plotId);
+      plot?.setHistory(history);
+    });
+
     this.socket.on('initialFilepath', ({ filepath, plotId }) => {
       const plot = this.plots.get(plotId);
       if (plot) {
@@ -781,7 +950,6 @@ const main = () => {
     const clearAllButton = document.getElementById('clear-all-button');
     const undoButton = document.getElementById('undo-button');
     const redoButton = document.getElementById('redo-button');
-
     const setConnectionStatus = (state, message) => {
       if (!mainHeader || !connectionStatusEl) return;
 

@@ -378,15 +378,15 @@ button:active {
 }
 
 .container.plot-updated {
-    animation: updateBounce 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: updateBounce 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 @keyframes updateBounce {
     0%, 100% {
         transform: scale(1);
     }
-    45% {
-        transform: scale(1.02);
+    50% {
+        transform: scale(1.01);
     }
 }
 
@@ -506,6 +506,92 @@ button:active {
     justify-content: space-between;
     align-items: center;
     gap: 16px;
+}
+
+.plot-history-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px dashed var(--border-soft);
+    background: var(--bg-light);
+    flex: 0 1 300px;
+    min-width: 240px;
+    justify-content: center;
+}
+
+.plot-history-button {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    background: var(--pastel-lavender);
+}
+
+.plot-history-button:hover {
+    background: var(--pastel-lavender-dark);
+}
+
+.plot-history-button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: var(--pastel-lavender);
+}
+
+.plot-history-button:disabled:hover {
+    background: var(--pastel-lavender);
+}
+
+.plot-history-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-align: center;
+}
+
+.plot-history-filepath {
+    font-family: 'SF Mono', Monaco, 'Consolas', 'Courier New', monospace;
+    font-size: 0.75rem;
+    color: var(--text-dark);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.plot-history-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.75rem;
+    color: var(--text-soft);
+}
+
+.plot-history-position {
+    font-weight: 600;
+}
+
+.plot-history-time {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex-wrap: wrap;
+}
+
+.plot-history-time-label {
+    font-weight: 600;
+}
+
+.plot-history-time-value {
+    font-family: 'SF Mono', Monaco, 'Consolas', 'Courier New', monospace;
+}
+
+.plot-history-time-ago {
+    font-style: italic;
 }
 
 .logo-block {
@@ -651,6 +737,7 @@ button:active {
     justify-content: space-between;
     align-items: center;
     gap: 8px;
+    flex-wrap: wrap;
 }
 
 .metadata-container .plot-reset-button,
@@ -661,22 +748,7 @@ button:active {
     width: 36px;
     height: 36px;
     flex-shrink: 0;
-}
-
-.update-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    color: var(--text-soft);
-    font-size: 0.9rem;
-}
-
-.plot-update-time,
-.plot-update-time-ago {
-    display: inline;
-    color: inherit;
+    margin: 0;
 }
 
 /* ===== DROPDOWNS ===== */

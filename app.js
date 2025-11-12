@@ -22,7 +22,9 @@ const port = Number.parseInt(program.opts().port, 10);
 const app = express();
 const publicDir = path.join(__dirname, 'public');
 const imagesDir = path.join(publicDir, 'images');
+const historyDir = path.join(imagesDir, 'history');
 fs.mkdirSync(imagesDir, { recursive: true });
+fs.mkdirSync(historyDir, { recursive: true });
 
 app.use(express.static(publicDir));
 app.get('/', (_req, res) => {
@@ -59,6 +61,61 @@ io.on('connection', (socket) => {
 
   const plotSources = new Map(); // plotId -> srcPath
   const fileMetadata = new Map(); // srcPath -> { copyPath, destPath, plots: Set }
+  const plotHistory = new Map(); // plotId -> Array
+
+  const getHistory = (plotId) => {
+    if (!plotHistory.has(plotId)) {
+      plotHistory.set(plotId, []);
+    }
+    return plotHistory.get(plotId);
+  };
+
+  const emitHistory = (plotId) => {
+    socket.emit('plotHistory', {
+      plotId,
+      history: getHistory(plotId)
+    });
+  };
+
+  const removeHistoryFile = (entry) => {
+    if (!entry?.filepath) return;
+    const absolutePath = path.join(publicDir, entry.filepath);
+    try {
+      fs.rmSync(absolutePath, { force: true });
+    } catch {
+      // ignore
+    }
+  };
+
+  const clearHistory = (plotId) => {
+    const history = plotHistory.get(plotId);
+    if (history) {
+      history.forEach(removeHistoryFile);
+    }
+    plotHistory.delete(plotId);
+  };
+
+  const pushHistoryEntry = (plotId, srcPath, latestCopyPath) => {
+    const history = getHistory(plotId);
+    const ext = path.extname(srcPath) || path.extname(latestCopyPath) || '.png';
+    const historyFilename = `${plotId}-${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
+    const historyCopyPath = path.join(historyDir, historyFilename);
+    const publicHistoryPath = path.join('images', 'history', historyFilename);
+
+    fs.copyFileSync(latestCopyPath, historyCopyPath);
+
+    history.push({
+      plotId,
+      srcPath,
+      filepath: publicHistoryPath,
+      timestamp: new Date().toISOString()
+    });
+    while (history.length > 10) {
+      const removed = history.shift();
+      removeHistoryFile(removed);
+    }
+    emitHistory(plotId);
+  };
 
   const ensureMetadata = (srcPath) => {
     if (!fileMetadata.has(srcPath)) {
@@ -72,7 +129,8 @@ io.on('connection', (socket) => {
     return fileMetadata.get(srcPath);
   };
 
-  const broadcastFile = (srcPath, plotIds) => {
+  const broadcastFile = (srcPath, plotIds, options = {}) => {
+    const { skipHistory = false } = options;
     const meta = fileMetadata.get(srcPath);
     if (!meta) return;
 
@@ -89,10 +147,13 @@ io.on('connection', (socket) => {
         filepath: meta.destPath,
         plotId
       });
+      if (!skipHistory) {
+        pushHistoryEntry(plotId, srcPath, meta.copyPath);
+      }
     });
   };
 
-  const watchPlot = ({ filepath, plotId }) => {
+  const watchPlot = ({ filepath, plotId, skipHistory = false }) => {
     if (!filepath) return;
     const numericPlotId = Number.parseInt(plotId, 10);
     if (Number.isNaN(numericPlotId)) return;
@@ -113,7 +174,10 @@ io.on('connection', (socket) => {
 
     plotSources.set(numericPlotId, resolvedPath);
     watcher.add(resolvedPath);
-    broadcastFile(resolvedPath, [numericPlotId]);
+    if (!skipHistory) {
+      emitHistory(numericPlotId);
+    }
+    broadcastFile(resolvedPath, [numericPlotId], { skipHistory });
   };
 
   const unwatchPlot = ({ plotId }) => {
@@ -132,6 +196,7 @@ io.on('connection', (socket) => {
       watcher.unwatch(srcPath);
       fileMetadata.delete(srcPath);
     }
+    clearHistory(numericPlotId);
   };
 
   watcher.on('change', (changedPath) => {
@@ -160,6 +225,7 @@ io.on('connection', (socket) => {
     watcher.close().catch(() => {});
     plotSources.clear();
     fileMetadata.clear();
+    Array.from(plotHistory.keys()).forEach(clearHistory);
   });
 
   if (initialFilepath) {
@@ -172,5 +238,6 @@ io.on('connection', (socket) => {
         plotId: initialPlotId
       });
     }
+    emitHistory(initialPlotId);
   }
 });
