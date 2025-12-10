@@ -442,7 +442,7 @@ class Plot {
       }
 
       const aspectRatio = this.img.naturalWidth / this.img.naturalHeight;
-      if (aspectRatio > 2.5) {
+      if (aspectRatio >= 1.9) {
         this.container.classList.add('full-width');
       } else {
         this.container.classList.remove('full-width');
